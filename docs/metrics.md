@@ -1,0 +1,2 @@
+﻿<!-- PASTE: docs/metrics.md -->
+
