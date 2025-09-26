@@ -1,2 +1,0 @@
-﻿<!-- PASTE: scripts/simulator.md -->
-
