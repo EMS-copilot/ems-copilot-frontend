@@ -43,7 +43,7 @@ export default function Step1Severity({ onNext }: Step1SeverityProps) {
       className="flex flex-col items-center"
     >
       {/* 중앙 이미지 */}
-      <div className="mb-10 mt-8">
+      <div className="mb-4 mt-8">
         <Image
           src="/lotties/severity-middle.png"
           alt="중증도 선택"
@@ -54,30 +54,30 @@ export default function Step1Severity({ onNext }: Step1SeverityProps) {
       </div>
 
       {/* 제목 */}
-      <h2 className="text-[22px] font-bold text-gray-900 mb-3 text-center">
+      <h2 className="text-[18px] font-semibold text-gray-900 mb-1 text-center">
         환자의 중증도를 선택해주세요
       </h2>
       
       {/* 설명 */}
-      <p className="text-[#9E9E9E] text-[14px] mb-10 text-center">
+      <p className="text-[#A3A3A3] font-regular text-[14px] mb-10 text-center">
         환자 상태를 기준으로 적절한 중증도를 선택해주세요
       </p>
 
       {/* 중증도 카드들 */}
-      <div className="flex gap-3 mb-12 w-full justify-center">
+      <div className="flex gap-3 mb-8 w-full justify-center">
         {SEVERITIES.map((item) => (
           <button
             key={item.id}
             onClick={() => setSelectedSeverity(item.id)}
-            className={`flex flex-col items-center justify-center bg-white rounded-2xl p-5 shadow-sm transition-all w-[100px] h-[140px] ${
+            className={`flex flex-col items-center justify-center bg-white rounded-2xl p-2 transition-all w-[112.33px] h-[164px] ${
               selectedSeverity === item.id
-                ? "border-2 border-[#1778FF]"
-                : "border border-gray-100 hover:border-gray-300"
+                ? "border-1 border-[#1778FF]"
+                : "border border-white hover:border-gray-300"
             }`}
           >
             {/* 아이콘 배경 */}
             <div
-              className="w-14 h-14 rounded-full flex items-center justify-center mb-3"
+              className="w-14 h-14 rounded-full flex items-center justify-center mb-3 flex-shrink-0"
               style={{ backgroundColor: `${item.color}15` }}
             >
               <Image
@@ -90,12 +90,12 @@ export default function Step1Severity({ onNext }: Step1SeverityProps) {
             </div>
 
             {/* 라벨 */}
-            <h3 className="font-semibold text-[15px] text-gray-900 mb-1">
+            <h3 className="font-semibold text-[15px] text-gray-900 mb-2">
               {item.label}
             </h3>
 
             {/* 설명 */}
-            <p className="text-[11px] text-[#9E9E9E] text-center leading-tight whitespace-pre-line">
+            <p className="text-[12px] font-light text-[#9E9E9E] text-center leading-tight whitespace-pre-line">
               {item.desc}
             </p>
           </button>
@@ -103,10 +103,10 @@ export default function Step1Severity({ onNext }: Step1SeverityProps) {
       </div>
 
       {/* 음성인식 AI 버튼 */}
-      <button className="flex items-center gap-2 bg-[#1778FF] text-white px-6 py-3 rounded-full shadow-md hover:bg-[#0D66E8] transition-all mb-8">
+      <button className="flex items-center mb-21 gap-1 bg-[#1778FF] text-white px-3 py-2 rounded-full shadow-md hover:bg-[#0D66E8] transition-all">
         <svg
-          width="20"
-          height="20"
+          width="15"
+          height="15"
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -120,18 +120,18 @@ export default function Step1Severity({ onNext }: Step1SeverityProps) {
             fill="currentColor"
           />
         </svg>
-        <span className="font-semibold text-[15px]">음성인식 AI</span>
+        <span className="font-medium text-[13px]">음성인식 AI</span>
       </button>
 
       {/* 하단 버튼들 */}
       <div className="flex gap-3 w-full">
-        <button className="flex-[0.8] py-4 rounded-xl border-2 border-gray-200 text-gray-600 font-semibold text-[15px] hover:bg-gray-50 transition-all">
+        <button className="flex-[0.8] w-[85px] h-[44px] rounded-full border-2 border-gray-200 text-gray-400 font-semibold text-[14px] hover:bg-gray-50 transition-all">
           이전
         </button>
         <button
           onClick={selectedSeverity ? onNext : undefined}
           disabled={!selectedSeverity}
-          className={`flex-[2] py-4 rounded-xl font-semibold text-[15px] transition-all ${
+          className={`flex-[2] w-[258px] h-[44px] rounded-full font-semibold text-[14px] transition-all ${
             selectedSeverity
               ? "bg-gray-900 text-white hover:bg-gray-800 cursor-pointer"
               : "bg-gray-200 text-gray-400 cursor-not-allowed"

@@ -3,19 +3,21 @@
 import { useState } from "react";
 import Header from "@/components/common/Header";
 import Step1Severity from "./Severity";
-import Step2Symptoms from "./Symptoms";
-import Step3Vitals from "./Vitals";
+import Step2Information from "./Information";
+import Step3Symptoms from "./Symptoms";
+import Step4Vitals from "./Vitals";
 
 const STEPS = [
   { number: 1, label: "중증도 선택" },
-  { number: 2, label: "증상 선택" },
-  { number: 3, label: "활력징후 등록" },
+  { number: 2, label: "환자 정보 입력" },
+  { number: 3, label: "증상 선택" },
+  { number: 4, label: "환자 입력 정보" },
 ];
 
 export default function AddPatientPage() {
   const [step, setStep] = useState(1);
 
-  const nextStep = () => setStep((prev) => Math.min(prev + 1, 3));
+  const nextStep = () => setStep((prev) => Math.min(prev + 1, 4));
   const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
 
   return (
@@ -27,7 +29,7 @@ export default function AddPatientPage() {
         {/* 단계 텍스트 */}
         <div className="flex items-center justify-center gap-2 mb-3">
           <span className="text-[13px] font-semibold text-gray-900">
-            {step}/3단계
+            {step}/4단계
           </span>
           <span className="text-gray-400 text-[13px]">|</span>
           <span className="text-[13px] font-medium text-gray-600">
@@ -52,8 +54,9 @@ export default function AddPatientPage() {
       <div className="flex-1 overflow-y-auto px-5 py-6">
         {/* 단계별 콘텐츠 */}
         {step === 1 && <Step1Severity onNext={nextStep} />}
-        {step === 2 && <Step2Symptoms onNext={nextStep} onPrev={prevStep} />}
-        {step === 3 && <Step3Vitals onPrev={prevStep} />}
+        {step === 2 && <Step2Information onNext={nextStep} onPrev={prevStep} />}
+        {step === 3 && <Step3Symptoms onNext={nextStep} onPrev={prevStep} />}
+        {step === 4 && <Step4Vitals onPrev={prevStep} />}
       </div>
     </main>
   );
