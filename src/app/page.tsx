@@ -36,7 +36,7 @@ export default function HomePage() {
         </div>
 
         {/* 본문 컨텐츠 */}
-        <div className="pt-[116px] px-4 space-y-6 pb-10">
+        <div className="pt-[76px] px-4 space-y-6 pb-10">
           <HomeStats />
           <NearbyHospitalsMap />
           <OngoingCases />

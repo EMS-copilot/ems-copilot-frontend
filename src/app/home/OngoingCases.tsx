@@ -18,9 +18,11 @@ interface Hospital {
 interface CaseItem {
   id: string;
   status: string;
+  symptom: string;
   time: string;
   location: string;
   hospital: Hospital;
+  hospitalStatus?: string;
 }
 
 export default function OngoingCases() {
@@ -31,8 +33,10 @@ export default function OngoingCases() {
     {
       id: "P2024-001",
       status: "위급",
+      symptom: "흉통",
       time: "14시 32분",
       location: "강남구 테헤란로 427",
+      hospitalStatus: "이송 중",
       hospital: {
         name: "중복대학교 병원",
         type: "서울특별시",
@@ -48,8 +52,10 @@ export default function OngoingCases() {
     {
       id: "P2024-002",
       status: "긴급",
+      symptom: "흉통",
       time: "14시 45분",
       location: "서초구 반포대로 123",
+      hospitalStatus: "이송 중",
       hospital: {
         name: "강남세브란스병원",
         type: "서울특별시",
@@ -77,58 +83,47 @@ export default function OngoingCases() {
 
   return (
     <>
-      <section>
-        <h2 className="text-[16px] font-bold text-gray-900 mb-3">
-          진행중인 사건
-          <span className="ml-2 text-[14px] text-gray-500">총 {cases.length}건</span>
-        </h2>
+      <section className="px-2">
+        {/* 섹션 제목 */}
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-[14px] font-medium text-gray-900">진행중인 사건</h2>
+          <span className="text-gray-400 font-light text-[12px]">총 {cases.length}건</span>
+        </div>
 
-        <div className="space-y-3">
+        <div className="flex flex-col gap-3">
           {cases.map((caseItem) => (
             <div
               key={caseItem.id}
               onClick={() => setSelectedHospital(caseItem.hospital)}
-              className="bg-white rounded-2xl p-4 border border-gray-200 cursor-pointer hover:border-[#1778FF] transition-all"
+              className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-col gap-2"
             >
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
+              <div className="flex items-start justify-between">
+                <div className="flex flex-col gap-1">
                   <span
                     className={`${getStatusColor(
                       caseItem.status
-                    )} text-white px-3 py-1 rounded-lg text-[13px] font-semibold`}
+                    )} text-white text-[12px] px-2 py-[2px] rounded-md font-medium w-fit`}
                   >
                     {caseItem.status}
                   </span>
-                  <span className="text-[16px] font-bold text-gray-900">
-                    {caseItem.id}
+                  <span className="text-[15px] font-semibold text-gray-900">
+                    {caseItem.id} | {caseItem.symptom}
                   </span>
                 </div>
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M7.5 15L12.5 10L7.5 5"
-                    stroke="#9CA3AF"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <button className="text-gray-400 text-[18px]">›</button>
               </div>
 
-              <div className="flex items-center gap-4 text-[13px] text-gray-500">
-                <div className="flex items-center gap-1">
-                  <span>🕐</span>
-                  <span>시작 : {caseItem.time}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span>📍</span>
-                  <span>{caseItem.location}</span>
-                </div>
+              <div className="flex items-center gap-1 text-[13px] text-gray-400">
+                <span>시작 : {caseItem.time}</span>
+                <span>📍 {caseItem.location}</span>
+              </div>
+
+              {/* 병원명 + 상태 */}
+              <div className="flex justify-between items-center rounded-xl px-4 py-[6px] text-white bg-gradient-to-r from-[#0193FF] to-[#000EE0]">
+                <span className="text-[13px] font-semibold">{caseItem.hospital.name}</span>
+                <span className="bg-[#1778FF] text-white text-[12px] px-3 py-[2px] rounded-full font-regular">
+                  {caseItem.hospitalStatus}
+                </span>
               </div>
             </div>
           ))}

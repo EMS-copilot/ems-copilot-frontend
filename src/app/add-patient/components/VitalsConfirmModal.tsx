@@ -32,7 +32,6 @@ export default function VitalsConfirmModal({
   onClose,
   onConfirm,
   vitals,
-  gcs,
   severity = "긴급",
   symptoms = ["흉통", "호흡곤란"],
 }: VitalsConfirmModalProps) {
