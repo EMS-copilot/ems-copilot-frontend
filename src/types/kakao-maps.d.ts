@@ -14,6 +14,7 @@ declare global {
       Size: new (width: number, height: number) => KakaoSize;
       Polyline: new (options: KakaoPolylineOptions) => KakaoPolyline;
       LatLngBounds: new () => KakaoLatLngBounds;
+      CustomOverlay: new (options: KakaoCustomOverlayOptions) => KakaoCustomOverlay;
     };
   }
   
@@ -38,6 +39,7 @@ declare global {
   interface KakaoMarkerOptions {
     position: KakaoLatLng;
     image?: KakaoMarkerImage;
+    map?: KakaoMap;
   }
   
   interface KakaoMarker {
@@ -45,15 +47,9 @@ declare global {
     getPosition: () => KakaoLatLng;
   }
   
-  interface KakaoMarkerImage {
-    src?: string;
-    size?: KakaoSize;
-  }
+  type KakaoMarkerImage = Record<string, unknown>;
   
-  interface KakaoSize {
-    width: number;
-    height: number;
-  }
+  type KakaoSize = Record<string, unknown>;
   
   interface KakaoPolylineOptions {
     path: KakaoLatLng[];
@@ -70,6 +66,22 @@ declare global {
   interface KakaoLatLngBounds {
     extend: (latlng: KakaoLatLng) => void;
     contain: (latlng: KakaoLatLng) => boolean;
+  }
+  
+  interface KakaoCustomOverlayOptions {
+    position: KakaoLatLng;
+    content: string | HTMLElement;
+    xAnchor?: number;
+    yAnchor?: number;
+    zIndex?: number;
+  }
+  
+  interface KakaoCustomOverlay {
+    setMap: (map: KakaoMap | null) => void;
+    getPosition: () => KakaoLatLng;
+    setPosition: (position: KakaoLatLng) => void;
+    setContent: (content: string | HTMLElement) => void;
+    setZIndex: (zIndex: number) => void;
   }
   
   export {};
