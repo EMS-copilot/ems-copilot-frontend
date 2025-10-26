@@ -84,12 +84,12 @@ export default function Step3Vitals({ onPrev }: Step3VitalsProps) {
       </div>
 
       {/* 제목 */}
-      <h2 className="text-[22px] font-bold text-gray-900 mb-2 text-center">
+      <h2 className="text-[18px] font-semibold text-gray-900 mb-1 text-center">
         초기 활력징후를 입력해주세요
       </h2>
 
       {/* 설명 */}
-      <p className="text-[#9E9E9E] text-[14px] mb-8 text-center">
+      <p className="text-[#A3A3A3] font-regular text-[14px] mb-10 text-center">
         측정한 값을 정확히 입력해주세요
       </p>
 
@@ -98,87 +98,118 @@ export default function Step3Vitals({ onPrev }: Step3VitalsProps) {
         {vitals.map((vital) => (
           <div
             key={vital.id}
-            className="bg-white rounded-2xl p-4 border border-gray-200"
+            className="bg-white rounded-2xl p-4 border border-gray-200 w-[172.5px] h-[126px] flex flex-col justify-center"
           >
-            <p className="text-[13px] font-semibold text-gray-900 mb-2 text-center">
+            {/* 활력징후 이름 */}
+            <p className="text-[14px] font-medium text-gray-900 mb-3 text-center">
               {vital.label}
             </p>
-            <div className="flex items-center justify-center gap-3 mb-2">
-              <button
-                onClick={() => updateVital(vital.id, -1)}
-                className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors"
-              >
-                −
-              </button>
-              <span className="text-[28px] font-bold text-[#1778FF] min-w-[70px] text-center">
+
+            {/* 수치 / 증감 버튼 */}
+            <div className="flex items-center justify-center gap-2 mb-1 mt-[-2px]">
+            <button
+              onClick={() => updateVital(vital.id, -1)}
+              className="appearance-none flex-shrink-0 w-[28px] h-[28px] rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors leading-none"
+            >
+              -
+            </button>
+
+              <span className="text-[24px] font-semibold text-[#1778FF] min-w-[70px] text-center leading-none translate-y-[-2px]">
                 {vital.value}
               </span>
+
               <button
                 onClick={() => updateVital(vital.id, 1)}
-                className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors"
+                className="appearance-none flex-shrink-0 w-[28px] h-[28px] rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors leading-none"
               >
                 +
               </button>
             </div>
-            <p className="text-[12px] text-gray-400 text-center">{vital.unit}</p>
+
+            {/* 단위 */}
+            <p className="text-[12px] text-gray-400 text-center mt-[-2px] translate-y-[-2px]">
+              {vital.unit}
+            </p>
           </div>
         ))}
       </div>
 
+
       {/* GCS 섹션 */}
-      <div className="bg-white rounded-2xl p-5 border border-gray-200 mb-8">
-        <h3 className="text-[16px] font-bold text-gray-900 mb-4 text-center">
+      <div className="w-[353px] mx-auto mb-8">
+        {/* 제목 (도형 밖) */}
+        <h3 className="text-[16px] font-semibold text-gray-900 mb-3 text-center">
           Glasgow Coma Scale (GCS)
         </h3>
 
-        <div className="grid grid-cols-3 gap-3 mb-4">
-          {[
-            { key: "eye" as const, label: "Eye (E)", value: gcs.eye },
-            { key: "verbal" as const, label: "Verbal (V)", value: gcs.verbal },
-            { key: "motor" as const, label: "Motor (M)", value: gcs.motor },
-          ].map((item) => (
-            <div key={item.key} className="text-center">
-              <p className="text-[12px] text-gray-600 mb-2">{item.label}</p>
-              <p className="text-[32px] font-bold text-[#1778FF] mb-2">
-                {item.value}
-              </p>
-              <div className="flex gap-2 justify-center">
-                <button
-                  onClick={() => updateGcs(item.key, -1)}
-                  className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors text-[18px]"
-                >
-                  −
-                </button>
-                <button
-                  onClick={() => updateGcs(item.key, 1)}
-                  className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors text-[18px]"
-                >
-                  +
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+        {/* 도형 전체 */}
+        <div className="bg-white rounded-2xl p-5 border border-gray-200 w-[353px] h-[186px] flex flex-col justify-between">
+          {/* 상단 3구역 (E / V / M) */}
+          <div className="grid grid-cols-3 divide-x divide-gray-200 flex-1">
+            {[
+              { key: "eye" as const, label: "Eye (E)", value: gcs.eye },
+              { key: "verbal" as const, label: "Verbal (V)", value: gcs.verbal },
+              { key: "motor" as const, label: "Motor (M)", value: gcs.motor },
+            ].map((item) => (
+              <div
+                key={item.key}
+                className="flex flex-col items-center justify-center px-2"
+              >
+                {/* 이름 */}
+                <p className="text-[14px] font-medium text-gray-900 mb-2 text-center">
+                  {item.label}
+                </p>
 
-        {/* GCS 총점 */}
-        <div className="bg-[#EFF6FF] rounded-xl py-3 text-center">
-          <span className="text-[14px] text-[#1778FF] font-semibold">
-            총점 : {gcsTotal}/15
-          </span>
+                {/* 점수 */}
+                <p
+                  className={`text-[24px] font-semibold mb-3 leading-none ${
+                    item.value ? "text-[#1778FF]" : "text-[#A3A3A3]"
+                  }`}
+                >
+                  {item.value || "—"}
+                </p>
+
+                {/* + / - 버튼 */}
+                <div className="flex gap-2.5 justify-center">
+                  <button
+                    onClick={() => updateGcs(item.key, -1)}
+                    className="appearance-none flex-shrink-0 w-[28px] h-[28px] rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 leading-none"
+                  >
+                    -
+                  </button>
+                  <button
+                    onClick={() => updateGcs(item.key, 1)}
+                    className="appearance-none flex-shrink-0 w-[28px] h-[28px] rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 leading-none"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* 총점 도형 */}
+          <div className="bg-[#EEF5FF] w-[329px] h-[44px] rounded-xl mt-4 mb-12 text-center">
+            <span className="text-[14px] text-[#1778FF] font-medium">
+              총점 : {gcsTotal}/15
+            </span>
+          </div>
         </div>
       </div>
 
+
+
       {/* 하단 버튼들 */}
-      <div className="flex gap-3 w-full">
+      <div className="flex gap-3 w-full py-4">
         <button
           onClick={onPrev}
-          className="flex-[0.8] py-4 rounded-xl border-2 border-gray-200 text-gray-600 font-semibold text-[15px] hover:bg-gray-50 transition-all"
+          className="flex-[0.8] w-[85px] h-[44px] rounded-full border-2 border-gray-200 text-gray-400 font-semibold text-[14px] hover:bg-gray-50 transition-all"
         >
           이전
         </button>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex-[2] py-4 rounded-xl bg-[#1778FF] text-white font-semibold text-[15px] hover:bg-[#0D66E8] transition-all"
+          className="flex-[2] w-[258px] h-[44px] rounded-full bg-[#1778FF] text-white font-semibold text-[14px] hover:bg-[#0D66E8] transition-all"
         >
           AI에게 병원 추천받기
         </button>
@@ -190,7 +221,6 @@ export default function Step3Vitals({ onPrev }: Step3VitalsProps) {
         onClose={() => setIsModalOpen(false)}
         onConfirm={() => {
           setIsModalOpen(false);
-          alert("AI 분석 시작! 🚑");
           // 여기서 실제 API 호출하면 됩니다
         }}
         vitals={vitals}
@@ -201,3 +231,4 @@ export default function Step3Vitals({ onPrev }: Step3VitalsProps) {
     </motion.div>
   );
 }
+

@@ -51,7 +51,7 @@ export default function AddPatientPage() {
       </div>
 
       {/* 스크롤 가능한 콘텐츠 영역 */}
-      <div className="flex-1 overflow-y-auto px-5 py-6">
+      <div className="flex-1 overflow-y-auto px-5">
         {/* 단계별 콘텐츠 */}
         {step === 1 && <Step1Severity onNext={nextStep} />}
         {step === 2 && <Step2Information onNext={nextStep} onPrev={prevStep} />}

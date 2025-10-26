@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Hospital {
@@ -23,9 +24,15 @@ function RequestConfirmModal({
   onConfirm,
   selectedHospitals,
 }: RequestConfirmModalProps) {
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  const handleConfirm = () => {
+    setShowSuccessModal(true);
+  };
+
   return (
     <AnimatePresence>
-      {isOpen && (
+      {isOpen && !showSuccessModal && (
         <>
           <motion.div
             initial={{ opacity: 0 }}
@@ -40,57 +47,125 @@ function RequestConfirmModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.2 }}
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] max-w-[340px] bg-white rounded-3xl shadow-2xl z-[75] overflow-hidden"
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] max-w-[364px] bg-white rounded-3xl shadow-2xl z-[75] overflow-hidden"
           >
-            <div className="px-6 pt-7 pb-6">
-              <h3 className="text-[20px] font-bold text-gray-900 mb-6">
+            <div className="px-6 pt-6 pb-6">
+              <h3 className="text-[18px] font-semibold text-black mb-4">
                 요청 병원 확인
               </h3>
 
-              <div className="mb-6 space-y-3">
+              <div className="mb-5 space-y-2">
                 {selectedHospitals.map((hospital) => (
                   <div
                     key={hospital.id}
-                    className="flex items-center justify-between py-2"
+                    className="flex items-center justify-between h-[44px] py-3 px-4 bg-[#F7F7F7] rounded-xl"
                   >
                     <div className="flex items-center gap-2">
                       <span className="text-[15px] font-semibold text-gray-900">
                         {hospital.name}
                       </span>
-                      <span
-                        className={`px-2 py-0.5 rounded text-[11px] font-medium ${
-                          hospital.badgeColor === "green"
-                            ? "bg-[#E8F5E9] text-[#27A959]"
-                            : "bg-[#F3E5F5] text-[#9C27B0]"
-                        }`}
-                      >
-                        {hospital.badgeText}
+                      <span className="text-[13px] text-gray-400">
+                        {hospital.type}
                       </span>
                     </div>
+                    <span
+                      className={`px-3 py-1 rounded text-[13px] font-medium flex-shrink-0 ${
+                        hospital.badgeColor === "green"
+                          ? "bg-[#E8F5E9] text-[#27A959]"
+                          : "bg-[#F3E5F5] text-[#9C27B0]"
+                      }`}
+                      style={{
+                        width: "47px",
+                        height: "28px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {hospital.badgeText}
+                    </span>
                   </div>
                 ))}
               </div>
 
-              <div className="mb-6 text-center p-3 bg-yellow-50 rounded-xl">
-                <p className="text-[13px] text-gray-700 leading-relaxed">
-                  총 {selectedHospitals.length}곳의 병원에 요청을 보내시겠어요?
-                </p>
+              <div className="text-[14px] text-center text-gray-800 font-medium mb-5">
+                총 {selectedHospitals.length}곳의 병원에 요청을 보내시겠어요?
               </div>
 
               <div className="flex gap-3">
                 <button
                   onClick={onClose}
-                  className="flex-1 py-3.5 rounded-xl border border-gray-300 text-gray-600 font-medium text-[15px] hover:bg-gray-50 transition-all"
+                  className="flex-[1] h-[48px] rounded-full border-2 border-gray-200 text-gray-400 font-medium text-[15px] hover:bg-gray-50 transition-all flex items-center justify-center"
                 >
                   이전
                 </button>
                 <button
-                  onClick={onConfirm}
-                  className="flex-[1.5] py-3.5 rounded-xl bg-gray-900 text-white font-medium text-[15px] hover:bg-gray-800 transition-all"
+                  onClick={handleConfirm}
+                  className="flex-[2] h-[48px] rounded-full bg-gray-900 text-white font-semibold text-[15px] hover:bg-gray-800 flex items-center justify-center transition-all"
                 >
                   요청 보내기
                 </button>
               </div>
+            </div>
+          </motion.div>
+        </>
+      )}
+
+      {/* 성공 모달 */}
+      {showSuccessModal && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/40 z-[80]"
+          />
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.3 }}
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] max-w-[300px] bg-white rounded-3xl shadow-2xl z-[85] overflow-hidden"
+          >
+            <div className="px-8 py-10 flex flex-col items-center">
+              {/* 체크 아이콘 */}
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+                className="w-16 h-16 bg-[#1778FF] rounded-full flex items-center justify-center mb-5"
+              >
+                <svg
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M5 13L9 17L19 7"
+                    stroke="white"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </motion.div>
+
+              <h3 className="text-[18px] font-bold text-gray-900 mb-2">
+                요청을 성공적으로 전송했어요!
+              </h3>
+              
+              <button
+                onClick={() => {
+                  setShowSuccessModal(false);
+                  onConfirm();
+                }}
+                className="mt-4 w-full h-[44px] rounded-full bg-[#F7F7F7] text-gray-700 font-medium text-[15px] hover:bg-gray-200 transition-all"
+              >
+                홈에서 대기하기
+              </button>
             </div>
           </motion.div>
         </>
