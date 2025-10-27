@@ -8,8 +8,8 @@
 
     /* JSX 및 Next.js 호환 설정 */
     "jsx": "preserve",
-    "module": "esnext",
-    "moduleResolution": "node",
+    "module": "Nodenext",
+    "moduleResolution": "Nodenext",
 
     /* 타입 관련 설정 */
     "strict": true,
