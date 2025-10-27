@@ -5,19 +5,33 @@ import { useState } from "react";
 import { Plus, X, UserPlus, Mic } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function FloatingButton() {
+interface FloatingButtonProps {
+  showModal?: boolean;
+  showHospitalConfirmModal?: boolean;
+}
+
+export default function FloatingButton({
+  showModal = false,
+  showHospitalConfirmModal = false,
+}: FloatingButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
 
-  // 버튼 클릭 시 이동 함수
   const handleAddPatient = () => {
-    setIsOpen(false); // 메뉴 닫고
-    router.push("/add-patient"); // 새 환자 등록 페이지로 이동
+    setIsOpen(false);
+    router.push("/add-patient");
   };
+
+  // ✅ 모달 유무에 따라 위치 계산
+  const buttonBottom = showModal ? "230px" : "28px";
+  const menuBottom = showModal ? "342px" : "90px";
+
+  // ✅ 병원확정모달이 열리면 아예 렌더링하지 않음
+  if (showHospitalConfirmModal) return null;
 
   return (
     <>
-      {/* ✅ 확장 메뉴 */}
+      {/* 확장 메뉴 */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -26,13 +40,14 @@ export default function FloatingButton() {
             exit={{ opacity: 0, y: 10 }}
             transition={{ duration: 0.2 }}
             className="
-              fixed bottom-[90px] right-[calc(50%-196.5px+20px)]
+              fixed right-[calc(50%-196.5px+20px)]
               bg-white rounded-2xl shadow-lg p-2
               flex flex-col gap-2
               z-[70]
+              transition-all duration-300
             "
+            style={{ bottom: menuBottom }}
           >
-            {/* 새 환자 추가하기 */}
             <button
               onClick={handleAddPatient}
               className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-50 transition"
@@ -43,7 +58,6 @@ export default function FloatingButton() {
               </span>
             </button>
 
-            {/* 음성으로 추가하기 */}
             <button
               onClick={() => alert("음성 추가 기능 준비 중 🎙️")}
               className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-50 transition"
@@ -57,18 +71,20 @@ export default function FloatingButton() {
         )}
       </AnimatePresence>
 
-      {/* ✅ 플로팅 버튼 */}
+      {/* 플로팅 버튼 */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="
-          fixed bottom-[28px] right-[calc(50%-196.5px+20px)]
+          fixed right-[calc(50%-196.5px+20px)]
           w-[56px] h-[56px]
           bg-black text-white rounded-full
           flex items-center justify-center
           shadow-lg
-          hover:bg-gray-800 active:scale-95 transition
+          hover:bg-gray-800 active:scale-95
+          transition-all duration-300
           z-[80]
         "
+        style={{ bottom: buttonBottom }}
       >
         {isOpen ? (
           <X size={26} strokeWidth={1.5} />

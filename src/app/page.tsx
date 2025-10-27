@@ -8,24 +8,42 @@ import OngoingCases from "./home/OngoingCases";
 import CompletedCases from "./home/CompletedCases";
 import FloatingButton from "@/components/common/FloatingButton";
 import OngoingRequestModal from "@/components/common/OngoingRequestModal";
+import HospitalConfirmModal from "@/components/common/HospitalConfirmModal";
 
 export default function HomePage() {
   const [showOngoingModal, setShowOngoingModal] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  // 페이지 로드 시 요청 중인 병원이 있는지 확인
   useEffect(() => {
-    // TODO: 실제로는 API나 localStorage에서 확인
-    const hasOngoingRequests = true; // 임시
+    const hasOngoingRequests = true; // TODO: 실제 API 연동
     if (hasOngoingRequests) {
       setShowOngoingModal(true);
     }
   }, []);
 
-  // 임시 데이터
+  // ✅ 진행 중 병원 리스트
   const ongoingHospitals = [
-    { name: "중복대학교 병원", type: "서울특별시", badgeColor: "green" as const, badgeText: "여유" },
-    { name: "강남세브란스병원", type: "서울특별시", badgeColor: "purple" as const, badgeText: "보통" },
+    {
+      name: "중복대학교 병원",
+      type: "서울특별시",
+      badgeColor: "green" as const,
+      badgeText: "여유",
+    },
+    {
+      name: "강남세브란스병원",
+      type: "서울특별시",
+      badgeColor: "purple" as const,
+      badgeText: "보통",
+    },
   ];
+
+  // ✅ 병원 확정 모달에 표시할 병원 (예시)
+  const selectedHospital = {
+    name: "중복대학교 병원",
+    type: "서울특별시",
+    badgeColor: "green" as const,
+    badgeText: "여유",
+  };
 
   return (
     <>
@@ -36,22 +54,31 @@ export default function HomePage() {
         </div>
 
         {/* 본문 컨텐츠 */}
-        <div className="pt-[76px] px-4 space-y-6 pb-10">
+        <div className="pt-[76px] px-4 space-y-6 pb-[230px]">
           <HomeStats />
           <NearbyHospitalsMap />
           <OngoingCases />
           <CompletedCases />
         </div>
 
-        {/* 플로팅 버튼 */}
-        <FloatingButton />
+        {/* 플로팅 버튼 — 모달 상태에 따라 위치/노출 제어 */}
+        <FloatingButton
+          showModal={showOngoingModal}
+          showHospitalConfirmModal={showConfirmModal} // ✅ 이 줄 추가!
+        />
       </main>
 
-      {/* 진행 중인 요청 모달 - main 밖에 렌더링 */}
+      {/* 진행 중인 요청 모달 */}
       {showOngoingModal && (
-        <OngoingRequestModal
-          hospitals={ongoingHospitals}
-          onClose={() => setShowOngoingModal(false)}
+        <OngoingRequestModal hospitals={ongoingHospitals} />
+      )}
+
+      {/* 병원 확정 모달 */}
+      {showConfirmModal && (
+        <HospitalConfirmModal
+          isOpen={showConfirmModal}
+          onClose={() => setShowConfirmModal(false)}
+          hospital={selectedHospital}
         />
       )}
     </>
