@@ -1,5 +1,5 @@
-// src/app/layout.tsx
 import "../styles/globals.css";
+import QueryProvider from "@/providers/query-provider";
 
 export const metadata = {
   title: "응급대원 앱",
@@ -23,7 +23,7 @@ export default function RootLayout({
             overflow-y-auto
           "
         >
-          {children}
+          <QueryProvider>{children}</QueryProvider>
         </div>
       </body>
     </html>
