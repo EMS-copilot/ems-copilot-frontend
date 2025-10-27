@@ -4,14 +4,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import HospitalRecommendationModal from "./HospitalRecommendationModal";
 
-interface VitalSign {
+export interface VitalSign {
   id: string;
   label: string;
   value: number;
   unit: string;
 }
 
-interface GCS {
+export interface GCS {
   eye: number;
   verbal: number;
   motor: number;
@@ -32,19 +32,20 @@ export default function VitalsConfirmModal({
   onClose,
   onConfirm,
   vitals,
+  gcs,
   severity = "긴급",
   symptoms = ["흉통", "호흡곤란"],
 }: VitalsConfirmModalProps) {
   const [showHospitalModal, setShowHospitalModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // ✅ 로딩 후 병원 추천 모달로 전환
+  // 로딩 후 병원 추천 모달로 전환
   useEffect(() => {
     if (isLoading) {
       const timer = setTimeout(() => {
         setIsLoading(false);
         setShowHospitalModal(true);
-      }, 3000); // ← 3초로 늘림
+      }, 3000);
       return () => clearTimeout(timer);
     }
   }, [isLoading]);
@@ -52,7 +53,7 @@ export default function VitalsConfirmModal({
   return (
     <>
       <AnimatePresence>
-        {/* ✅ 환자 정보 확인 모달 */}
+        {/* 환자 정보 확인 모달 */}
         {isOpen && !showHospitalModal && (
           <>
             {/* 배경 */}
@@ -147,6 +148,21 @@ export default function VitalsConfirmModal({
                     </div>
                   </div>
 
+                  {/* GCS 표시 */}
+                  <div className="mb-3">
+                    <p className="text-[12px] font-light text-gray-500 mb-2">
+                      GCS (Eye / Verbal / Motor)
+                    </p>
+                    <div className="flex justify-between bg-gray-50 rounded-xl px-4 py-2">
+                      <span className="text-[13px] font-medium text-gray-800">
+                        {gcs.eye} / {gcs.verbal} / {gcs.motor}
+                      </span>
+                      <span className="text-[13px] text-[#1778FF] font-semibold">
+                        총점 {gcs.eye + gcs.verbal + gcs.motor}/15
+                      </span>
+                    </div>
+                  </div>
+
                   {/* 안내 문구 */}
                   <div className="mb-2.5 text-center">
                     <p className="text-[13px] text-gray-600 leading-relaxed">
@@ -178,7 +194,7 @@ export default function VitalsConfirmModal({
               </motion.div>
             )}
 
-            {/* ✅ 로딩 애니메이션 화면 */}
+            {/* 로딩 애니메이션 */}
             {isLoading && (
               <motion.div
                 initial={{ opacity: 0 }}
@@ -193,7 +209,6 @@ export default function VitalsConfirmModal({
                   transition={{ duration: 0.3 }}
                   className="bg-white rounded-3xl w-[85%] max-w-[320px] h-[160px] flex flex-col items-center justify-center text-center shadow-2xl"
                 >
-                  {/* 파란 점 애니메이션 */}
                   <div className="flex gap-2 mb-4">
                     {[0, 1, 2].map((i) => (
                       <motion.div
@@ -223,7 +238,7 @@ export default function VitalsConfirmModal({
         )}
       </AnimatePresence>
 
-      {/* ✅ 병원 추천 모달 */}
+      {/* 병원 추천 모달 */}
       <HospitalRecommendationModal
         isOpen={showHospitalModal}
         onClose={() => {
