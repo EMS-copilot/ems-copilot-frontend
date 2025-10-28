@@ -19,7 +19,7 @@ export default function HomePage() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   useEffect(() => {
-    // 🔐 로그인 체크
+    // 로그인 체크
     const token = localStorage.getItem("authToken");
     if (!token) {
       // 토큰이 없으면 로그인 페이지로 리다이렉트

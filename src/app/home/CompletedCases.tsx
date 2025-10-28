@@ -40,7 +40,7 @@ export default function CompletedCases() {
             {/* 상단 정보 */}
             <div className="flex items-center justify-between">
               <div className="flex flex-col gap-1">
-                <span className="bg-[#FF4545] text-white text-[12px] px-2 py-[2px] rounded-md font-medium w-fit">
+                <span className="bg-[#FF4545] text-white text-[12px] px-2 py-0.5 rounded-md font-medium w-fit">
                   {c.type}
                 </span>
                 <span className="text-[15px] font-semibold text-gray-900">
@@ -57,9 +57,9 @@ export default function CompletedCases() {
             </div>
 
             {/* 병원명 + 이송 완료 상태 */}
-            <div className="flex justify-between items-center rounded-xl px-4 py-[6px] text-white bg-gradient-to-r from-[#777777] to-[#999999]">
+            <div className="flex justify-between items-center rounded-xl px-4 py-1.5 text-white bg-linear-to-r from-[#777777] to-[#999999]">
               <span className="text-[13px] font-semibold">{c.hospital}</span>
-              <span className="bg-white text-gray-900 text-[12px] px-3 py-[2px] rounded-full font-regular">
+              <span className="bg-white text-gray-900 text-[12px] px-3 py-0.5 rounded-full font-regular">
                 {c.status}
               </span>
             </div>

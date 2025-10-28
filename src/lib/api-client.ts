@@ -5,7 +5,7 @@ import axios, {
     InternalAxiosRequestConfig,
   } from "axios";
   
-  export const API_BASE_URL = "http://3.106.198.206:8080";
+  export const API_BASE_URL = "https://emsapi.online";
   
   const apiClient: AxiosInstance = axios.create({
     baseURL: API_BASE_URL,

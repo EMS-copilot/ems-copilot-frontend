@@ -24,13 +24,17 @@ export default function Step2Information({ onNext, onPrev }: Step2InformationPro
     }
 
     if (unit === "year") {
-      if (numValue < 0 || numValue > 120)
+      if (numValue < 0 || numValue > 120) {
         setAgeError("나이는 0~120세 범위로 입력해주세요.");
-      else setAgeError("");
+      } else {
+        setAgeError("");
+      }
     } else {
-      if (numValue < 0 || numValue > 36)
+      if (numValue < 0 || numValue > 36) {
         setAgeError("개월은 0~36개월까지 입력해주세요.");
-      else setAgeError("");
+      } else {
+        setAgeError("");
+      }
     }
   };
 
@@ -41,120 +45,237 @@ export default function Step2Information({ onNext, onPrev }: Step2InformationPro
 
   const handleUnitChange = (unit: "year" | "month") => {
     setAgeUnit(unit);
-    if (ageValue) validateAge(ageValue, unit);
+    if (ageValue) {
+      validateAge(ageValue, unit);
+    }
   };
 
   const isFormValid = ageValue && sex && triageLevel && !ageError;
+
+  const handleNext = () => {
+    if (!isFormValid) return;
+    onNext({
+      age: Number(ageValue),
+      sex: sex!,
+      triageLevel: triageLevel!,
+    });
+  };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
-      className="flex flex-col items-center pb-[76px]"
+      className="flex flex-col items-center pb-4"
     >
-      <div className="mt-10 mb-8 text-center">
-        <Image src="/lotties/info-middle.png" alt="환자 정보" width={120} height={120} />
-        <h2 className="text-[18px] font-semibold text-gray-900 mt-4 mb-2">
-          환자의 기본 정보를 입력해주세요
-        </h2>
-        <p className="text-[#A3A3A3] text-[14px]">
-          나이, 성별, 중증도 정보를 입력해야 합니다.
-        </p>
+      {/* 중앙 이미지 */}
+      <div className="mb-4 mt-8">
+        <Image
+          src="/lotties/severity-middle.png"
+          alt="환자 정보"
+          width={120}
+          height={120}
+          className="object-contain"
+        />
       </div>
 
-      <div className="w-full space-y-6">
-        <div>
-          <label className="block text-gray-700 font-medium mb-2 text-[15px]">나이</label>
-          <div className="flex gap-3">
-            <input
-              type="number"
-              value={ageValue}
-              onChange={(e) => handleAgeChange(e.target.value)}
-              placeholder="나이를 입력하세요"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg text-[14px]"
-            />
-            <select
-              value={ageUnit}
-              onChange={(e) => handleUnitChange(e.target.value as "year" | "month")}
-              className="border border-gray-300 rounded-lg px-3 py-2 text-[14px]"
-            >
-              <option value="year">세</option>
-              <option value="month">개월</option>
-            </select>
-          </div>
-          {ageError && <p className="text-red-500 text-[13px] mt-1">{ageError}</p>}
-        </div>
+      {/* 제목 */}
+      <h2 className="text-[18px] font-semibold text-gray-900 text-center">
+        환자의 정보를 입력해주세요
+      </h2>
 
-        <div>
-          <label className="block text-gray-700 font-medium mb-2 text-[15px]">성별</label>
-          <div className="flex gap-4">
-            <button
-              onClick={() => setSex("male")}
-              className={`flex-1 py-2 rounded-lg border ${
-                sex === "male" ? "bg-[#1778FF] text-white" : "border-gray-300 text-gray-600"
-              }`}
-            >
-              남성
-            </button>
-            <button
-              onClick={() => setSex("female")}
-              className={`flex-1 py-2 rounded-lg border ${
-                sex === "female" ? "bg-[#1778FF] text-white" : "border-gray-300 text-gray-600"
-              }`}
-            >
-              여성
-            </button>
-          </div>
-        </div>
+      {/* 설명 */}
+      <p className="text-[#A3A3A3] font-regular text-[14px] mb-10 text-center">
+        환자의 나이, 성별, Triage Level을 입력해주세요.
+      </p>
 
-        <div>
-          <label className="block text-gray-700 font-medium mb-2 text-[15px]">
-            중증도 (1~5단계)
+      {/* 환자 나이 */}
+      <div className="w-full mb-3">
+        <div className="flex items-center justify-between mb-3">
+          <label className="text-[16px] font-semibold text-gray-900">
+            환자 나이 <span className="text-[13px] font-light text-gray-400">(Age)</span>
           </label>
-          <div className="flex gap-2">
-            {[1, 2, 3, 4, 5].map((n) => (
-              <button
-                key={n}
-                onClick={() => setTriageLevel(n)}
-                className={`flex-1 py-2 rounded-lg border ${
-                  triageLevel === n ? "bg-[#1778FF] text-white" : "border-gray-300 text-gray-600"
-                }`}
-              >
-                {n}
-              </button>
-            ))}
+
+          {/* 🔘 년 / 개월 토글 스위치 */}
+          <div className="relative flex w-[107px] h-7 bg-white border border-gray-300 rounded-full p-1">
+            <div
+              className={`absolute top-0.5 bottom-0.5 w-[50%] bg-[#131313] rounded-full transition-all duration-300 ${
+                ageUnit === "year" ? "left-0.5" : "left-[calc(50%-2px)]"
+              }`}
+            ></div>
+
+            <button
+              onClick={() => handleUnitChange("year")}
+              className={`z-10 flex-1 text-[12px] font-medium transition-all ${
+                ageUnit === "year" ? "text-white" : "text-gray-500"
+              }`}
+            >
+              년
+            </button>
+            <button
+              onClick={() => handleUnitChange("month")}
+              className={`z-10 flex-1 text-[12px] font-medium transition-all ${
+                ageUnit === "month" ? "text-white" : "text-gray-500"
+              }`}
+            >
+              개월
+            </button>
           </div>
         </div>
+
+        <div className="relative flex items-center">
+          <input
+            type="number"
+            placeholder={ageUnit === "year" ? "예) 43" : "예) 24"}
+            value={ageValue}
+            onChange={(e) => handleAgeChange(e.target.value)}
+            className={`w-full px-4 py-3 rounded-xl border bg-white text-[15px] placeholder:text-gray-300 focus:outline-none ${
+              ageError
+                ? "border-red-500 focus:border-red-500"
+                : "border-gray-200 focus:border-[#1778FF]"
+            }`}
+          />
+          <span className="ml-2 text-gray-400 text-[14px] whitespace-nowrap translate-y-[12.5px]">
+            {ageUnit === "year" ? "세" : "개월"}
+          </span>
+        </div>
+
+        {ageError && (
+          <div className="flex items-center gap-1 mt-2 text-red-500 text-[13px]">
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" />
+              <path
+                d="M8 4V8.5M8 11V11.5"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+            </svg>
+            <span>{ageError}</span>
+          </div>
+        )}
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 max-w-[393px] mx-auto bg-[#f7f7f7] border-t border-gray-100 px-5 py-4">
-        <div className="flex gap-3 w-full">
+      {/* 성별 */}
+      <div className="w-full mb-3">
+        <label className="text-[16px] font-semibold text-gray-900 mb-3 block">
+          성별 <span className="text-[13px] font-light text-gray-400">(Sex)</span>
+        </label>
+
+        <div className="flex gap-3">
           <button
-            onClick={onPrev}
-            className="flex-[0.8] w-[85px] h-[44px] rounded-full border-2 border-gray-200 text-gray-400 font-semibold text-[14px]"
-          >
-            이전
-          </button>
-          <button
-            onClick={() =>
-              isFormValid &&
-              onNext({
-                age: Number(ageValue),
-                sex: sex!,
-                triageLevel: triageLevel!,
-              })
-            }
-            disabled={!isFormValid}
-            className={`flex-[2] w-[258px] h-[44px] rounded-full font-semibold text-[14px] ${
-              isFormValid
-                ? "bg-gray-900 text-white hover:bg-gray-800"
-                : "bg-gray-200 text-gray-400"
+            onClick={() => setSex("male")}
+            className={`w-[172.5px] h-11 rounded-xl flex items-center justify-center gap-2 text-[14px] transition-all border ${
+              sex === "male"
+                ? "bg-[#1778FF] text-white border-[#1778FF]"
+                : "bg-white border-gray-200 text-gray-900"
             }`}
           >
-            다음 스텝 진행하기
+            <Image
+              src={sex === "male" ? "/male-outline.png" : "/male-filled.png"}
+              alt="male-icon"
+              width={24}
+              height={24}
+              className="w-5 h-5"
+            />
+            <span>남성 Male</span>
+          </button>
+
+          <button
+            onClick={() => setSex("female")}
+            className={`w-[172.5px] h-11 rounded-xl flex items-center justify-center gap-2 text-[14px] transition-all border ${
+              sex === "female"
+                ? "bg-[#FF5374] text-white border-[#FF5374]"
+                : "bg-white border-gray-200 text-gray-900"
+            }`}
+          >
+            <Image
+              src={sex === "female" ? "/female-outline.png" : "/female-filled.png"}
+              alt="female-icon"
+              width={24}
+              height={24}
+              className="w-5 h-5"
+            />
+            <span>여성 Female</span>
           </button>
         </div>
+      </div>
+
+      {/* Triage Level */}
+      <div className="w-full mb-8">
+        <label className="text-[16px] font-semibold text-gray-900 mb-3 block">
+          Triage Level
+        </label>
+        <div className="flex gap-2 justify-between">
+          {[
+            { level: 5, label: "경증", color: "#27A959" },
+            { level: 4, label: "준응급", color: "#1778FF" },
+            { level: 3, label: "잠재적 위급", color: "#975BFF" },
+            { level: 2, label: "중증", color: "#D9801A" },
+            { level: 1, label: "최중증", color: "#CF0E0E" },
+          ].map((item) => (
+            <button
+              key={item.level}
+              onClick={() => setTriageLevel(item.level)}
+              className={`w-16 h-[100px] rounded-xl flex flex-col items-center justify-center transition-all border-2 ${
+                triageLevel === item.level
+                  ? "bg-white"
+                  : "bg-white border-gray-200 opacity-70 hover:opacity-100"
+              }`}
+              style={{
+                borderColor:
+                  triageLevel === item.level ? item.color : "#E5E7EB",
+              }}
+            >
+              <div
+                className="w-6 h-6 rounded-full flex items-center justify-center mb-2 transition-all"
+                style={{
+                  backgroundColor:
+                    triageLevel === item.level ? item.color : "#9E9E9E",
+                }}
+              >
+                <span className="text-[12px] text-white">{item.level}</span>
+              </div>
+              <span
+                className={`text-[12px] transition-all ${
+                  triageLevel === item.level ? "font-medium" : "text-gray-500"
+                }`}
+                style={{
+                  color: triageLevel === item.level ? item.color : "#9E9E9E",
+                }}
+              >
+                {item.label}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 하단 버튼 */}
+      <div className="flex gap-3 w-full">
+        <button
+          onClick={onPrev}
+          className="flex-[0.8] w-[85px] h-11 rounded-full border-2 border-gray-200 text-gray-400 font-semibold text-[14px] hover:bg-gray-50 transition-all"
+        >
+          이전
+        </button>
+        <button
+          onClick={handleNext}
+          disabled={!isFormValid}
+          className={`flex-2 w-[258px] h-11 rounded-full font-semibold text-[14px] transition-all ${
+            isFormValid
+              ? "bg-gray-900 text-white hover:bg-gray-800 cursor-pointer"
+              : "bg-gray-200 text-gray-400 cursor-not-allowed"
+          }`}
+        >
+          다음 스텝 진행하기
+        </button>
       </div>
     </motion.div>
   );

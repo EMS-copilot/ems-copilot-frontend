@@ -11,6 +11,10 @@ interface HeaderProps {
 
 export default function Header({ variant = "home", title }: HeaderProps) {
   const router = useRouter();
+
+  // ✅ 로그인 후 저장된 토큰이 유지되는지 확인용 콘솔
+  console.log("현재 저장된 authToken:", localStorage.getItem("authToken"));
+
   const { data: myName, isLoading } = useMyName();
 
   return (
@@ -29,7 +33,7 @@ export default function Header({ variant = "home", title }: HeaderProps) {
         {/* 왼쪽 영역 */}
         {variant === "home" ? (
           <div className="flex items-center space-x-3">
-            <div className="bg-[#1778FF] text-white text-[13px] font-semibold h-[28px] leading-[28px] px-3 rounded-full text-center tracking-wider">
+            <div className="bg-[#1778FF] text-white text-[13px] font-semibold h-7 leading-7 px-3 rounded-full text-center tracking-wider">
               근무중
             </div>
             <div className="text-base font-medium text-gray-800">
@@ -44,7 +48,7 @@ export default function Header({ variant = "home", title }: HeaderProps) {
           <div className="flex items-center space-x-2">
             <button
               onClick={() => router.back()}
-              className="w-[28px] h-[28px] flex items-center justify-center"
+              className="w-7 h-7 flex items-center justify-center"
             >
               <ArrowLeft className="text-[#464D47]" strokeWidth={1.5} />
             </button>
@@ -54,11 +58,11 @@ export default function Header({ variant = "home", title }: HeaderProps) {
 
         {/* 오른쪽 영역 */}
         <div className="flex items-center space-x-2">
-          <button className="w-[28px] h-[28px] flex items-center justify-center bg-[#E3F6EA] rounded-xl">
-            <Wifi className="text-[#27A959] w-[16px] h-[16px]" />
+          <button className="w-7 h-7 flex items-center justify-center bg-[#E3F6EA] rounded-xl">
+            <Wifi className="text-[#27A959] w-4 h-4" />
           </button>
 
-          <button className="w-[28px] h-[28px] flex items-center justify-center">
+          <button className="w-7 h-7 flex items-center justify-center">
             <Menu className="text-[#464D47]" strokeWidth={1.5} />
           </button>
         </div>
