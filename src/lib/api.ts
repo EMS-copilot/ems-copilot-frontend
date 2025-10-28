@@ -28,6 +28,9 @@ export const login = async (
 
 // ✅ 구급대원 이름 조회 (수정됨: /api/users/me)
 export const getMyName = async () => {
+
+  if (typeof window === "undefined") return null;
+  
   const token = localStorage.getItem("authToken");
   if (!token) throw new Error("No auth token found");
 
