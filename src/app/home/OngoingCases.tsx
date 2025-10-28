@@ -102,7 +102,7 @@ export default function OngoingCases() {
                   <span
                     className={`${getStatusColor(
                       caseItem.status
-                    )} text-white text-[12px] px-2 py-[2px] rounded-md font-medium w-fit`}
+                    )} text-white text-[12px] px-2 py-0.5 rounded-md font-medium w-fit`}
                   >
                     {caseItem.status}
                   </span>
@@ -119,9 +119,9 @@ export default function OngoingCases() {
               </div>
 
               {/* 병원명 + 상태 */}
-              <div className="flex justify-between items-center rounded-xl px-4 py-[6px] text-white bg-gradient-to-r from-[#0193FF] to-[#000EE0]">
+              <div className="flex justify-between items-center rounded-xl px-4 py-1.5 text-white bg-linear-to-r from-[#0193FF] to-[#000EE0]">
                 <span className="text-[13px] font-semibold">{caseItem.hospital.name}</span>
-                <span className="bg-[#1778FF] text-white text-[12px] px-3 py-[2px] rounded-full font-regular">
+                <span className="bg-[#1778FF] text-white text-[12px] px-3 py-0.5 rounded-full font-regular">
                   {caseItem.hospitalStatus}
                 </span>
               </div>

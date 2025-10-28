@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/common/Header";
 import Step1Severity from "./Severity";
 import Step2Information from "./Information";
@@ -36,12 +36,21 @@ export default function AddPatientPage() {
   const [info, setInfo] = useState<PatientInfo>({});
   const [symptoms, setSymptoms] = useState<string[]>([]);
   const [vitals, setVitals] = useState<VitalsPayload | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // ✅ 클라이언트 마운트 확인
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const nextStep = () => setStep((prev) => Math.min(prev + 1, 4));
   const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
 
-  // ✅ 실제 API 요청 함수
+  // ✅ 실제 API 요청 함수 (클라이언트에서만 실행)
   const handleSubmit = async () => {
+    // ✅ 클라이언트 마운트 전에는 실행 안 함
+    if (!isMounted) return;
+    
     if (!info.age || !info.sex || !info.triageLevel || !vitals) {
       alert("입력 정보가 완전하지 않습니다.");
       return;
@@ -87,8 +96,13 @@ export default function AddPatientPage() {
     }
   };
 
+  // ✅ 마운트 전에는 로딩 표시 (선택사항)
+  if (!isMounted) {
+    return null; // 또는 <div>Loading...</div>
+  }
+
   return (
-    <main className="w-full max-w-[393px] mx-auto min-h-[100dvh] bg-[#F7F7F7] flex flex-col">
+    <main className="w-full max-w-[393px] mx-auto min-h-dvh bg-[#F7F7F7] flex flex-col">
       <Header variant="sub" title="새 환자 등록" />
 
       {/* 단계 표시 */}

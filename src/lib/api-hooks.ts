@@ -25,11 +25,12 @@ export const useLogin = () => {
 
 // 이름 조회
 export const useMyName = () => {
-    return useQuery({
-      queryKey: ["myName"],
-      queryFn: api.getMyName,
-      staleTime: 1000 * 60 * 5, // 5분 캐싱
-    });
+  return useQuery({
+    queryKey: ["myName"],
+    queryFn: api.getMyName,
+    staleTime: 1000 * 60 * 5,
+    retry: false,
+  });
 };
 
 // 환자 등록
@@ -38,4 +39,14 @@ export const useRegisterPatient = () => {
       mutationFn: (payload: api.RegisterPatientRequest) =>
         api.registerPatient(payload),
     });
-  };
+};
+
+// 병원 목록 조회 훅
+export const useHospitals = () => {
+  return useQuery({
+    queryKey: ["hospitals"],
+    queryFn: api.getHospitals,
+    staleTime: 1000 * 60 * 5, // 5분 캐싱
+    retry: false, // 서버 500 반복 방지
+  });
+};
