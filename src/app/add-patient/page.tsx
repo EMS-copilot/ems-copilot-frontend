@@ -42,6 +42,8 @@ export default function AddPatientPage() {
 
   // ✅ 실제 API 요청 함수
   const handleSubmit = async () => {
+    if (typeof window === "undefined") return;
+    
     if (!info.age || !info.sex || !info.triageLevel || !vitals) {
       alert("입력 정보가 완전하지 않습니다.");
       return;
@@ -88,7 +90,7 @@ export default function AddPatientPage() {
   };
 
   return (
-    <main className="w-full max-w-[393px] mx-auto min-h-[100dvh] bg-[#F7F7F7] flex flex-col">
+    <main className="w-full max-w-[393px] mx-auto min-h-dvh bg-[#F7F7F7] flex flex-col">
       <Header variant="sub" title="새 환자 등록" />
 
       {/* 단계 표시 */}
