@@ -6,7 +6,8 @@ import Step1Severity from "./Severity";
 import Step2Information from "./Information";
 import Step3Symptoms from "./Symptoms";
 import Step4Vitals from "./Vitals";
-import axios from "axios";
+import * as api from "@/lib/api";
+import type { RegisterPatientRequest } from "@/lib/api";
 
 interface PatientInfo {
   age?: number;
@@ -38,7 +39,6 @@ export default function AddPatientPage() {
   const [vitals, setVitals] = useState<VitalsPayload | null>(null);
   const [isMounted, setIsMounted] = useState(false);
 
-  // ✅ 클라이언트 마운트 확인
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -46,66 +46,96 @@ export default function AddPatientPage() {
   const nextStep = () => setStep((prev) => Math.min(prev + 1, 4));
   const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
 
-  // ✅ 실제 API 요청 함수 (클라이언트에서만 실행)
-  const handleSubmit = async () => {
-    // ✅ 클라이언트 마운트 전에는 실행 안 함
+  /* ------------------------------------
+   * ✅ 환자 등록 + 추천 병원 조회 (fallback 포함)
+   * ------------------------------------ */
+  const handleSubmit = async (vitalsArg?: VitalsPayload) => {
     if (!isMounted) return;
-    
-    if (!info.age || !info.sex || !info.triageLevel || !vitals) {
-      alert("입력 정보가 완전하지 않습니다.");
-      return;
+
+    const usedVitals = vitalsArg ?? vitals;
+
+    if (!info.age || !info.sex || !info.triageLevel || !usedVitals) {
+      console.error("⚠️ 입력 불완전:", {
+        age: info.age,
+        sex: info.sex,
+        triageLevel: info.triageLevel,
+        vitalsState: vitals,
+        vitalsArg,
+      });
+      alert("입력 정보가 완전하지 않습니다. (콘솔 확인)");
+      throw new Error("입력 정보 불완전");
     }
 
-    const token = localStorage.getItem("authToken");
-
-    const payload = {
+    const payload: RegisterPatientRequest = {
       age: info.age,
       sex: info.sex === "male" ? "M" : "F",
       triageLevel: info.triageLevel,
-      sbp: vitals.sbp,
-      dbp: vitals.dbp,
-      hr: vitals.hr,
-      rr: vitals.rr,
-      spo2: vitals.spo2,
-      temp: vitals.temp,
+      sbp: usedVitals.sbp,
+      dbp: usedVitals.dbp,
+      hr: usedVitals.hr,
+      rr: usedVitals.rr,
+      spo2: usedVitals.spo2,
+      temp: usedVitals.temp,
       symptoms,
     };
 
-    console.log("📦 전송할 데이터:", payload);
+    console.log("📦 [전송할 데이터]:", payload);
 
     try {
-      const response = await axios.post(
-        "http://localhost:8080/api/patients/register",
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
+      // 1️⃣ 환자 등록 요청
+      const response = await api.registerPatient(payload);
+      console.log("✅ 환자 등록 성공:", response);
+      const recommended = response.data?.recommendedHospitals ?? [];
+
+      console.log("📍 추천 병원 개수:", recommended.length);
+      console.table(recommended ?? []);
+
+      // 2️⃣ 추천 병원이 없을 경우 fallback으로 거리 기반 병원 조회
+      if (recommended.length === 0) {
+        console.warn("⚠️ 추천 병원 없음 → 거리 기반 병원 조회로 대체");
+
+        try {
+          const nearbyRes = await api.getNearbyHospitals(10); // 거리 10km 내 검색
+          const nearbyHospitals = (nearbyRes.data ?? []).slice(0, 3); // 상위 3개
+
+          console.log("📍 거리 기반 병원 목록:", nearbyHospitals);
+
+          // 동일 구조로 변환
+          return nearbyHospitals.map((h: any, index: number) => ({
+            hospitalId: h.externalId ?? String(h.id),
+            hospitalName: h.name,
+            aiScore: h.hospitalCapacity ?? 0,
+            priority: index + 1,
+            aiExplanations: {},
+            distance: h.distance,
+            eta: h.eta,
+          }));
+        } catch (fallbackError) {
+          console.error("❌ 거리 기반 병원 조회 실패:", fallbackError);
+          alert("추천 병원 조회 중 오류가 발생했습니다.");
+          return [];
         }
-      );
+      }
 
-      console.log("✅ 환자 등록 성공:", response.data);
-      alert("환자 정보가 등록되었습니다.\n추천 병원 결과를 콘솔에서 확인하세요.");
-
-      // ✅ 추천 병원 결과 콘솔 출력
-      console.table(response.data.data.recommendedHospitals);
+      // 3️⃣ 추천 병원이 있을 경우 그대로 반환
+      return recommended;
     } catch (error: any) {
       console.error("❌ 등록 실패:", error.response?.data || error.message);
-      alert("환자 정보 등록 중 오류가 발생했습니다.");
+      alert("환자 등록 중 오류가 발생했습니다.");
+      throw error;
     }
   };
 
-  // ✅ 마운트 전에는 로딩 표시 (선택사항)
-  if (!isMounted) {
-    return null; // 또는 <div>Loading...</div>
-  }
+  if (!isMounted) return null;
 
+  /* ------------------------------------
+   * JSX 렌더링
+   * ------------------------------------ */
   return (
     <main className="w-full max-w-[393px] mx-auto min-h-dvh bg-[#F7F7F7] flex flex-col">
       <Header variant="sub" title="새 환자 등록" />
 
-      {/* 단계 표시 */}
+      {/* 진행 단계 표시 */}
       <div className="bg-[#F7F7F7] px-5 py-4">
         <div className="flex items-center justify-center gap-2 mb-3">
           <span className="text-[13px] font-semibold text-gray-900">
@@ -128,19 +158,30 @@ export default function AddPatientPage() {
         </div>
       </div>
 
-      {/* 단계별 화면 */}
+      {/* 단계별 컴포넌트 */}
       <div className="flex-1 overflow-y-auto px-5">
         {step === 1 && (
           <Step1Severity
             onNext={nextStep}
-            onSelect={(value) => setSeverity(value)}
+            onSelect={(value) => {
+              setSeverity(value);
+              setInfo((prev) => ({
+                ...prev,
+                triageLevel:
+                  value === "critical"
+                    ? 1
+                    : value === "urgent"
+                    ? 2
+                    : 3,
+              }));
+            }}
           />
         )}
 
         {step === 2 && (
           <Step2Information
             onNext={(formData) => {
-              setInfo(formData);
+              setInfo((prev) => ({ ...prev, ...formData }));
               nextStep();
             }}
             onPrev={prevStep}
@@ -160,7 +201,7 @@ export default function AddPatientPage() {
         {step === 4 && (
           <Step4Vitals
             onPrev={prevStep}
-            onSubmit={(vitalsData) => {
+            onSubmit={async (vitalsData) => {
               const payload: VitalsPayload = {
                 sbp: vitalsData.sbp,
                 dbp: vitalsData.dbp,
@@ -170,8 +211,12 @@ export default function AddPatientPage() {
                 temp: vitalsData.temp,
               };
               setVitals(payload);
-              handleSubmit();
+
+              // ✅ 바로 handleSubmit 전달
+              return handleSubmit(payload);
             }}
+            severity={severity || "긴급"}
+            symptoms={symptoms}
           />
         )}
       </div>

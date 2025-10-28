@@ -17,9 +17,9 @@ export default function NearbyHospitalsMap() {
   };
 
   const createMarkerSvg = (color: string) => `
-    <svg width="40" height="48" viewBox="0 0 40 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M20 0C8.954 0 0 8.954 0 20C0 31.046 20 48 20 48C20 48 40 31.046 40 20C40 8.954 31.046 0 20 0Z" fill="${color}"/>
-      <circle cx="20" cy="18" r="8" fill="white"/>
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="10" cy="10" r="10" fill="${color}"/>
+      <image href="/Marker-icon.png" x="5" y="5" width="10" height="10"/>
     </svg>
   `;
 
@@ -47,10 +47,13 @@ export default function NearbyHospitalsMap() {
       const newMarkers: any[] = [];
 
       hospitals.forEach((h: any) => {
-        // 병원 좌표 정보가 없으면 표시하지 않음
-        if (!h.lat || !h.lng) return;
+        // 더미 좌표 생성 (실제로는 h.lat, h.lng 사용)
+        const baseLat = 37.498;
+        const baseLng = 127.027;
+        const lat = h.lat || baseLat + (Math.random() - 0.5) * 0.1;
+        const lng = h.lng || baseLng + (Math.random() - 0.5) * 0.1;
 
-        const pos = new window.kakao.maps.LatLng(h.lat, h.lng);
+        const pos = new window.kakao.maps.LatLng(lat, lng);
         const color = getStatusColor(h.hospitalCapacity);
 
         const markerContent = document.createElement("div");
@@ -60,7 +63,8 @@ export default function NearbyHospitalsMap() {
         const marker = new window.kakao.maps.CustomOverlay({
           position: pos,
           content: markerContent,
-          yAnchor: 1,
+          yAnchor: 0.5,
+          xAnchor: 0,
         });
         marker.setMap(map);
         newMarkers.push({ marker, position: pos });
@@ -72,17 +76,23 @@ export default function NearbyHospitalsMap() {
             <div style="
               background: white;
               border-radius: 12px;
-              padding: 6px 12px;
-              font-size: 13px;
+              padding: 2px 12px;
+              font-size: 11px;
               font-weight: 600;
-              border: 2px solid ${color};
+              border: 1px solid ${color};
               white-space: nowrap;
-              box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-              margin-top: -8px;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+              margin-top: 3px;
+              height: 24px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              box-sizing: border-box;
             ">
               ${h.name}
             </div>`,
-          yAnchor: 2.3,
+          yAnchor: -0.3,
+          xAnchor: 0,
         });
         label.setMap(map);
       });
@@ -140,27 +150,17 @@ export default function NearbyHospitalsMap() {
               onClick={() => handleHospitalClick(i)}
               className={`w-full bg-white rounded-2xl border py-3 flex flex-col items-start transition-all ${
                 selectedHospital === i
-                  ? "border-gray-300 bg-gray-50"
-                  : "border-gray-100 hover:border-gray-200 hover:bg-gray-50"
+                  ? "border-[#1778FF]"
+                  : "border-gray-200 hover:border-gray-300"
               }`}
             >
               <div className="flex items-center justify-between w-full mb-1.5">
                 <span className="text-[14px] font-medium text-[#131313] truncate pl-2 pr-2">
                   {h.name}
                 </span>
-                <span
-                  className="text-[12px] font-semibold pr-3"
-                  style={{ color: getStatusColor(h.hospitalCapacity) }}
-                >
-                  {h.hospitalCapacity >= 85
-                    ? "여유"
-                    : h.hospitalCapacity >= 70
-                    ? "보통"
-                    : "포화"}
-                </span>
               </div>
               <span className="text-[13px] text-gray-400 pl-2">
-                {h.address} · {h.distance}km
+                {h.distance}km
               </span>
             </button>
           ))}

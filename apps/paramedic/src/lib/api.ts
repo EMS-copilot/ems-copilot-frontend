@@ -119,10 +119,16 @@ export const registerPatient = async (
   return data;
 };
 
-/* -----------------------------------
- * 병원 목록 조회 API
- * ----------------------------------- */
+// 병원 목록 조회 API
 export const getHospitals = async () => {
-  const res = await apiClient.get("/hospitals");
+  const res = await apiClient.get("/api/hospitals");
   return res.data.data;
+};
+
+// 거리 기반 병원 조회
+export const getNearbyHospitals = async (distance: number = 10) => {
+  const response = await apiClient.get(`/api/hospitals/nearby`, {
+    params: { distance },
+  });
+  return response.data; // { status, message, data: Hospital[] }
 };

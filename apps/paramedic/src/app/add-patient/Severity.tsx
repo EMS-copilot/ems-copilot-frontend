@@ -70,13 +70,13 @@ export default function Step1Severity({ onNext, onSelect }: Step1SeverityProps) 
 
       <div className="fixed bottom-0 left-0 right-0 max-w-[393px] mx-auto bg-[#f7f7f7] border-t border-gray-100 px-5 py-4">
         <div className="flex gap-3 w-full">
-          <button className="flex-[0.8] h-[44px] rounded-full border-2 border-gray-200 text-gray-400 font-semibold text-[14px]">
+          <button className="flex-[0.8] h-11 rounded-full border-2 border-gray-200 text-gray-400 font-semibold text-[14px]">
             이전
           </button>
           <button
             onClick={selectedSeverity ? onNext : undefined}
             disabled={!selectedSeverity}
-            className={`flex-[2] h-[44px] rounded-full font-semibold text-[14px] ${
+            className={`flex-2 h-11 rounded-full font-semibold text-[14px] ${
               selectedSeverity
                 ? "bg-gray-900 text-white hover:bg-gray-800"
                 : "bg-gray-200 text-gray-400 cursor-not-allowed"

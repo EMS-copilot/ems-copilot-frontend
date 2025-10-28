@@ -1,110 +1,79 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import RequestConfirmModal from "./RequestConfirmModal";
 import Header from "@/components/common/Header";
 
-interface Hospital {
-  id: string;
-  name: string;
-  type: string;
-  distance: string;
-  waitTime: string;
-  beds: string;
-  departments: string[];
-  treatments: string[];
-  specialties: string[];
-  checked: boolean;
-  badgeColor: "green" | "purple";
-  badgeText: string;
-}
+type RecommendedHospital = {
+  hospitalId: string;
+  hospitalName: string;
+  aiScore: number;
+  priority: number;
+  aiExplanations: Record<string, any>;
+  distance: number; // km
+  eta: number; // min
+};
+
+type Summary = {
+  severity: string;
+  symptoms: string[];
+  vitals: { id: string; label: string; value: number; unit: string }[];
+};
 
 interface HospitalRecommendationModalProps {
   isOpen: boolean;
   onClose: () => void;
+  aiHospitals: RecommendedHospital[];
+  summary?: Summary;
 }
 
 export default function HospitalRecommendationModal({
   isOpen,
   onClose,
+  aiHospitals,
+  summary,
 }: HospitalRecommendationModalProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [showRequestModal, setShowRequestModal] = useState(false);
-  const [hospitals, setHospitals] = useState<Hospital[]>([
-    {
-      id: "1",
-      name: "중복대학교 병원",
-      type: "서울특별시",
-      distance: "3.4km",
-      waitTime: "8분",
-      beds: "12분",
-      departments: ["최단거리", "수용 확률 높음", "전문의 보유"],
-      treatments: ["PCI", "ECMO", "IABP"],
-      specialties: ["심혈관센터, 응급실"],
-      checked: false,
-      badgeColor: "green",
-      badgeText: "여유",
-    },
-    {
-      id: "2",
-      name: "강남세브란스병원",
-      type: "서울특별시",
-      distance: "3.4km",
-      waitTime: "8분",
-      beds: "12분",
-      departments: ["최단거리", "수용 확률 높음", "전문의 보유"],
-      treatments: ["PCI", "ECMO", "IABP"],
-      specialties: ["뇌출혈센터 운영, 신경외과 전문의 대기"],
-      checked: false,
-      badgeColor: "purple",
-      badgeText: "보통",
-    },
-    {
-      id: "3",
-      name: "서울아산병원",
-      type: "서울특별시",
-      distance: "5.2km",
-      waitTime: "12분",
-      beds: "15분",
-      departments: ["최단거리", "수용 확률 높음", "전문의 보유"],
-      treatments: ["CABG", "TAVR", "CT"],
-      specialties: ["심장병 전문 클리닉 및 응급실팀 대응"],
-      checked: false,
-      badgeColor: "purple",
-      badgeText: "우수",
-    },
-    {
-      id: "4",
-      name: "삼성서울병원",
-      type: "서울특별시",
-      distance: "6.1km",
-      waitTime: "15분",
-      beds: "18분",
-      departments: ["최단거리", "수용 확률 높음", "전문의 보유"],
-      treatments: ["PCI", "ECMO", "IABP"],
-      specialties: ["심장센터, 응급실"],
-      checked: false,
-      badgeColor: "purple",
-      badgeText: "우수",
-    },
-  ]);
 
+  // ✅ API 응답 -> UI 데이터 변환
+  const hospitals = useMemo(() => {
+    return (aiHospitals ?? []).map((h) => ({
+      id: h.hospitalId,
+      name: h.hospitalName,
+      type: "서울특별시", // ✅ Hospital 타입 요구사항 반영
+      distance: `${h.distance}km`,
+      waitTime: `${h.eta}분`,
+      beds: "-",
+      departments: ["AI 추천", "가까운 거리", "수용 가능"],
+      treatments: ["응급", "심혈관", "외상"],
+      specialties: ["24시간 응급실 운영"],
+      checked: false,
+      badgeColor: h.priority <= 2 ? ("green" as const) : ("purple" as const), // ✅ 문자열 literal로 고정
+      badgeText: h.priority <= 2 ? "우수" : "보통",
+      aiScore: h.aiScore,
+      priority: h.priority,
+    }));
+  }, [aiHospitals]);
+  
+
+  const [hospitalList, setHospitalList] = useState(hospitals);
   const [selectedCount, setSelectedCount] = useState(0);
 
   useEffect(() => {
-    if (isOpen) {
-      setIsLoading(true);
-      const timer = setTimeout(() => setIsLoading(false), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen]);
+    if (!isOpen) return;
+    setHospitalList(hospitals);
+    setIsLoading(true);
+    const timer = setTimeout(() => setIsLoading(false), 1800);
+    return () => clearTimeout(timer);
+  }, [isOpen, hospitals]);
 
   const toggleHospital = (id: string) => {
-    setHospitals((prev) => {
+    setHospitalList((prev) => {
       const updated = prev.map((h) =>
         h.id === id ? { ...h, checked: !h.checked } : h
       );
@@ -113,7 +82,7 @@ export default function HospitalRecommendationModal({
     });
   };
 
-  const selectedHospitals = hospitals.filter((h) => h.checked);
+  const selectedHospitals = hospitalList.filter((h) => h.checked);
 
   if (!isOpen) return null;
 
@@ -121,18 +90,13 @@ export default function HospitalRecommendationModal({
     <>
       {/* 로딩 화면 */}
       {isLoading && (
-        <div className="fixed inset-0 bg-[#F7F7F7] z-[60] flex justify-center">
+        <div className="fixed inset-0 bg-[#F7F7F7] z-60 flex justify-center">
           <div className="w-full max-w-[393px] flex flex-col">
             <Header variant="sub" title="새 환자 등록" />
-
             <div className="flex-1 flex flex-col items-center justify-center px-6">
               <motion.div
                 animate={{ rotate: 360 }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "linear",
-                }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                 className="mb-6"
               >
                 <Image
@@ -157,13 +121,35 @@ export default function HospitalRecommendationModal({
       {/* 병원 목록 */}
       {!isLoading && !showRequestModal && (
         <>
-          <div
-            className="fixed inset-0 bg-black/30 z-[55]"
-            onClick={onClose}
-          />
-          <div className="fixed inset-0 flex justify-center z-[58] pointer-events-none">
+          <div className="fixed inset-0 bg-black/30 z-55" onClick={onClose} />
+          <div className="fixed inset-0 flex justify-center z-58 pointer-events-none">
             <div className="w-full max-w-[393px] h-full relative pointer-events-auto flex flex-col">
               <Header variant="sub" title="새 환자 등록" />
+
+              {/* 상단 요약 */}
+              {summary && (
+                <div className="bg-white border-b border-gray-200 px-5 py-3 flex flex-wrap gap-2">
+                  <span
+                    className={`px-3 h-7 inline-flex items-center rounded-xl text-[12px] ${
+                      summary.severity === "위급"
+                        ? "bg-[#FB4D40] text-white"
+                        : summary.severity === "긴급"
+                        ? "bg-[#FFA034] text-white"
+                        : "bg-[#27A959] text-white"
+                    }`}
+                  >
+                    {summary.severity}
+                  </span>
+                  {summary.symptoms.slice(0, 2).map((s, i) => (
+                    <span
+                      key={i}
+                      className="px-3 h-7 inline-flex items-center rounded-xl text-[12px] bg-[#E3F2FD] text-[#1778FF]"
+                    >
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              )}
 
               {/* 콘텐츠 영역 */}
               <div className="flex-1 bg-[#F7F7F7] rounded-t-3xl overflow-hidden flex flex-col mt-15">
@@ -188,13 +174,16 @@ export default function HospitalRecommendationModal({
                       <input
                         type="checkbox"
                         id="select-all"
-                        checked={selectedCount === hospitals.length}
+                        checked={
+                          selectedCount > 0 &&
+                          selectedCount === hospitalList.length
+                        }
                         onChange={(e) => {
                           const checked = e.target.checked;
-                          setHospitals((prev) =>
+                          setHospitalList((prev) =>
                             prev.map((h) => ({ ...h, checked }))
                           );
-                          setSelectedCount(checked ? hospitals.length : 0);
+                          setSelectedCount(checked ? hospitalList.length : 0);
                         }}
                         className="w-[18px] h-[18px] rounded border-gray-300 text-[#1778FF] focus:ring-[#1778FF]"
                       />
@@ -206,66 +195,66 @@ export default function HospitalRecommendationModal({
                       </label>
                     </div>
                     <span className="text-[13px] font-regular text-gray-400">
-                      총 4건
+                      총 {hospitalList.length}건
                     </span>
                   </div>
 
-                  {/* 병원 카드들 */}
+                  {/* 병원 카드 리스트 */}
                   <div className="space-y-3 pb-2">
-                    {hospitals.map((hospital) => (
+                    {hospitalList.map((hospital) => (
                       <div
                         key={hospital.id}
                         className="bg-white rounded-2xl p-4 border border-white"
                       >
-                        {/* 첫 번째 줄: 체크박스 + 병원명 + 지역 + 배지 */}
                         <div className="flex items-start gap-3 mb-3">
                           <input
                             type="checkbox"
                             checked={hospital.checked}
                             onChange={() => toggleHospital(hospital.id)}
-                            className="mt-1.5 w-[16px] h-[16px] rounded border-gray-200 text-[#1778FF] focus:ring-[#1778FF] flex-shrink-0"
+                            className="mt-1.5 w-4 h-4 rounded border-gray-200 text-[#1778FF] focus:ring-[#1778FF] shrink-0"
                           />
                           <div className="flex-1 flex items-center justify-between gap-2">
                             <div className="flex items-center gap-2">
                               <h3 className="text-[16px] font-semibold text-black">
                                 {hospital.name}
                               </h3>
-                              <span className="text-[13px] font-regular text-gray-400">
-                                {hospital.type}
-                              </span>
                             </div>
                             <span
-                              className={`px-3 py-1 rounded-full text-[13px] font-medium flex-shrink-0 ${
+                              className={`px-3 py-1 rounded-full text-[13px] font-medium shrink-0 ${
                                 hospital.badgeColor === "green"
                                   ? "bg-[#E8F5E9] text-[#27A959]"
                                   : "bg-[#F3E5F5] text-[#9C27B0]"
                               }`}
-                              style={{ width: "47px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center" }}
+                              style={{
+                                width: "47px",
+                                height: "28px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
                             >
                               {hospital.badgeText}
                             </span>
                           </div>
                         </div>
 
-                        {/* 특성 정보 박스 */}
-                        <div className="bg-[#F7F7F7] rounded-lg px-3 py-2.5 mb-2" style={{ width: "321px", height: "36px", display: "flex", alignItems: "center" }}>
+                        <div className="bg-[#F7F7F7] rounded-lg px-3 py-2.5 mb-2 flex items-center">
                           <p className="text-[13px] font-medium text-gray-700">
                             {hospital.specialties[0]}
                           </p>
                         </div>
 
-                        {/* 치료 가능 시술 박스 */}
-                        <div
-                          className="bg-[#F7F7F7] rounded-lg px-3 py-2.5 mb-4 flex items-center"
-                          style={{ width: "321px", height: "36px" }}
-                        >
+                        <div className="bg-[#F7F7F7] rounded-lg px-3 py-2.5 mb-4 flex items-center">
                           <span className="text-[13px] font-medium text-gray-600 mr-1.5">
                             치료 가능 시술 :
                           </span>
                           <div className="flex items-center flex-wrap">
-                            {hospital.treatments.map((treatment, idx) => (
-                              <span key={idx} className="text-[13px] font-semibold text-[#1778FF]">
-                                {treatment}
+                            {hospital.treatments.map((t, idx) => (
+                              <span
+                                key={idx}
+                                className="text-[13px] font-semibold text-[#1778FF]"
+                              >
+                                {t}
                                 {idx < hospital.treatments.length - 1 && (
                                   <span className="text-[#1778FF] mx-1">|</span>
                                 )}
@@ -274,7 +263,7 @@ export default function HospitalRecommendationModal({
                           </div>
                         </div>
 
-                        {/* 거리/시간 정보 */}
+                        {/* 거리 / 시간 */}
                         <div className="grid grid-cols-3 mb-4 divide-x divide-gray-200">
                           <div className="text-center px-1">
                             <p className="text-[13px] font-regular text-gray-500">
@@ -302,20 +291,25 @@ export default function HospitalRecommendationModal({
                           </div>
                         </div>
 
-                        {/* 특성 태그들 */}
-                        <div className="flex gap-2 mb-3">
+                        {/* 태그 */}
+                        <div className="flex gap-2 mb-3 flex-wrap">
                           {hospital.departments.map((dept, idx) => (
                             <span
                               key={idx}
                               className="px-1 bg-[#E3F2FD] text-[#1778FF] rounded-full text-[13px] font-regular"
-                              style={{ height: "32px", display: "flex", alignItems: "center", padding: "0 16px" }}
+                              style={{
+                                height: "32px",
+                                display: "flex",
+                                alignItems: "center",
+                                padding: "0 16px",
+                              }}
                             >
                               {dept}
                             </span>
                           ))}
                         </div>
 
-                        {/* 하단 버튼들 */}
+                        {/* 버튼 */}
                         <div className="flex gap-2">
                           <button className="w-[73px] py-2.5 rounded-xl border border-gray-300 text-gray-700 text-[13px] font-medium hover:bg-gray-50 transition-colors">
                             문의

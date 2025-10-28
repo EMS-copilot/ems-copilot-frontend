@@ -1,50 +1,11 @@
 {
-  "compilerOptions": {
-    /* 기본 컴파일 타겟 */
-    "target": "ES2020",
-
-    /* 브라우저 + 최신 JS 기능 지원 */
-    "lib": ["dom", "dom.iterable", "esnext"],
-
-    /* JSX 및 Next.js 호환 설정 */
-    "jsx": "preserve",
-    "module": "Nodenext",
-    "moduleResolution": "Nodenext",
-
-    /* 타입 관련 설정 */
-    "strict": true,
-    "allowJs": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "forceConsistentCasingInFileNames": true,
-
-    /* 경로 alias 설정 */
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    },
-
-    /* 빌드 관련 */
-    "incremental": true,
-    "noEmit": true,
-
-    /* Next.js 전용 플러그인 */
-    "plugins": [{ "name": "next" }],
-
-    /* JSON import 시 default export 허용 */
-    "allowSyntheticDefaultImports": true,
-
-    /* Node.js 타입 참조 */
-    "types": ["node"]
-  },
-  "include": [
-    "next-env.d.ts",
-    "next.config.js",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts"
-  ],
-  "exclude": ["node_modules"]
-}
+    "files": [],
+    "references": [
+      { "path": "apps/paramedic" },
+      { "path": "apps/hospital" },
+      { "path": "packages/lib" },
+      { "path": "packages/ui" },
+      { "path": "packages/types" }
+    ]
+  }
+  

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import HospitalRecommendationModal from "./HospitalRecommendationModal";
 
 export interface VitalSign {
@@ -9,6 +9,7 @@ export interface VitalSign {
   label: string;
   value: number;
   unit: string;
+  touched: boolean;
 }
 
 export interface GCS {
@@ -20,43 +21,94 @@ export interface GCS {
 interface VitalsConfirmModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: (() => Promise<any>) | null;
   vitals: VitalSign[];
   gcs: GCS;
-  severity?: string;
-  symptoms?: string[];
+  severity: string;
+  symptoms: string[];
 }
+
+type RecommendedHospital = {
+  hospitalId: string;
+  hospitalName: string;
+  aiScore: number;
+  priority: number;
+  aiExplanations: Record<string, any>;
+  distance: number;
+  eta: number;
+};
+
+/* ---------------------------
+ * 색상/라벨 매핑 (업데이트 반영)
+ * --------------------------- */
+const SEVERITY_MAP = {
+  normal:   { label: "일반",   cls: "bg-[#E3F6EA] text-[#27A959]" },
+  urgent:   { label: "긴급",   cls: "bg-[#FFF3E6] text-[#FFA034]" },
+  critical: { label: "위급",   cls: "bg-[#FEE4E2] text-[#FB4D40]" },
+} as const;
+
+const SYMPTOM_LABELS: Record<string, string> = {
+  "abdominal-pain": "복통",
+  unconscious: "의식저하",
+  fever: "발열",
+  bleeding: "출혈",
+  headache: "두통",
+  breathing: "호흡곤란",
+  injury: "외상",
+  "chest-pain": "흉통",
+  stroke: "뇌졸중",
+};
+
+// 활력징후 표시용
+const VITAL_DISPLAY = [
+  { id: "sbp",  label: "SBP",  unit: "mmHg" },
+  { id: "dbp",  label: "DBP",  unit: "mmHg" },
+  { id: "hr",   label: "HR",   unit: "bpm" },
+  { id: "rr",   label: "RR",   unit: "/min" },
+  { id: "spo2", label: "SpO₂", unit: "%" },
+  { id: "temp", label: "Temp", unit: "°C" },
+];
 
 export default function VitalsConfirmModal({
   isOpen,
   onClose,
   onConfirm,
   vitals,
-  gcs,
-  severity = "긴급",
-  symptoms = ["흉통", "호흡곤란"],
+  severity,
+  symptoms,
 }: VitalsConfirmModalProps) {
   const [showHospitalModal, setShowHospitalModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [aiHospitals, setAiHospitals] = useState<RecommendedHospital[] | null>(null);
 
-  // 로딩 후 병원 추천 모달로 전환
-  useEffect(() => {
-    if (isLoading) {
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-        setShowHospitalModal(true);
-      }, 3000);
-      return () => clearTimeout(timer);
+  const handleConfirm = async () => {
+    if (!onConfirm) return;
+    setIsLoading(true);
+    try {
+      const hospitals = (await onConfirm()) as RecommendedHospital[];
+      setAiHospitals(hospitals || []);
+      setIsLoading(false);
+      setShowHospitalModal(true);
+    } catch (error) {
+      console.error("병원 추천 실패:", error);
+      setIsLoading(false);
+      alert("병원 추천 중 오류가 발생했습니다.");
     }
-  }, [isLoading]);
+  };
+
+  const severityBadge = (() => {
+    const s = SEVERITY_MAP[severity as keyof typeof SEVERITY_MAP];
+    return {
+      text: s?.label ?? severity,
+      cls: s?.cls ?? "bg-[#27A959] text-white",
+    };
+  })();
 
   return (
     <>
       <AnimatePresence>
-        {/* 환자 정보 확인 모달 */}
         {isOpen && !showHospitalModal && (
           <>
-            {/* 배경 */}
             {!isLoading && (
               <motion.div
                 initial={{ opacity: 0 }}
@@ -67,7 +119,6 @@ export default function VitalsConfirmModal({
               />
             )}
 
-            {/* 본문 */}
             {!isLoading && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -86,15 +137,9 @@ export default function VitalsConfirmModal({
                     <div className="flex items-center justify-between">
                       <p className="text-[12px] font-light text-gray-500">환자 중증도</p>
                       <span
-                        className={`px-3 h-[28px] flex items-center justify-center rounded-xl text-[13px] font-medium ${
-                          severity === "위급"
-                            ? "bg-[#FFEBEE] text-[#FF4545]"
-                            : severity === "긴급"
-                            ? "bg-[#E3F2FD] text-[#1778FF]"
-                            : "bg-[#E8F5E9] text-[#27A959]"
-                        }`}
+                        className={`px-3 h-7 flex items-center justify-center rounded-xl text-[13px] font-medium ${severityBadge.cls}`}
                       >
-                        {severity}
+                        {severityBadge.text}
                       </span>
                     </div>
                   </div>
@@ -104,12 +149,12 @@ export default function VitalsConfirmModal({
                     <div className="flex items-center justify-between">
                       <p className="text-[12px] font-light text-gray-500">주요 증상</p>
                       <div className="flex gap-2">
-                        {symptoms.slice(0, 2).map((symptom, idx) => (
+                        {symptoms.slice(0, 2).map((id, idx) => (
                           <span
                             key={idx}
-                            className="h-[28px] px-3 flex items-center justify-center rounded-xl text-[13px] font-medium bg-[#E3F2FD] text-[#1778FF]"
+                            className="h-7 px-3 flex items-center justify-center rounded-xl text-[13px] font-medium bg-[#E3F2FD] text-[#1778FF]"
                           >
-                            {symptom}
+                            {SYMPTOM_LABELS[id] ?? id}
                           </span>
                         ))}
                       </div>
@@ -118,52 +163,24 @@ export default function VitalsConfirmModal({
 
                   {/* 초기 활력징후 */}
                   <div className="mb-2.5">
-                    <p className="text-[12px] font-light text-gray-500 mb-3">
-                      초기 활력징후
-                    </p>
-                    <div className="bg-gray-50 rounded-2xl p-4 grid grid-cols-2 gap-y-0.5 gap-x-6">
-                      {[
-                        ["SBP", "mmHg"],
-                        ["DBP", "mmHg"],
-                        ["HR", "bpm"],
-                        ["RR", "/min"],
-                        ["SpO₂", "%"],
-                        ["Temp", "°C"],
-                      ].map(([key, unit]) => (
-                        <div
-                          key={key}
-                          className="flex items-center justify-between"
-                        >
-                          <span className="text-[13px] font-regular text-gray-500">{key}</span>
-                          <span className="text-[13px] font-medium text-black">
-                            {
-                              vitals.find(
-                                (v) => v.id.toLowerCase() === key.toLowerCase()
-                              )?.value
-                            }
-                            {unit}
-                          </span>
-                        </div>
-                      ))}
+                    <p className="text-[12px] font-light text-gray-500 mb-3">초기 활력징후</p>
+                    <div className="bg-gray-50 rounded-2xl p-4 grid grid-cols-2 gap-y-1 gap-x-6">
+                      {VITAL_DISPLAY.map(({ id, label, unit }) => {
+                        const value = vitals.find((v) => v.id === id)?.value;
+                        return (
+                          <div key={id} className="flex items-center justify-between">
+                            <span className="text-[13px] text-gray-500">{label}</span>
+                            <span className="text-[13px] font-medium text-black">
+                              {value ?? "-"}
+                              {unit}
+                            </span>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
 
-                  {/* GCS 표시 */}
-                  <div className="mb-3">
-                    <p className="text-[12px] font-light text-gray-500 mb-2">
-                      GCS (Eye / Verbal / Motor)
-                    </p>
-                    <div className="flex justify-between bg-gray-50 rounded-xl px-4 py-2">
-                      <span className="text-[13px] font-medium text-gray-800">
-                        {gcs.eye} / {gcs.verbal} / {gcs.motor}
-                      </span>
-                      <span className="text-[13px] text-[#1778FF] font-semibold">
-                        총점 {gcs.eye + gcs.verbal + gcs.motor}/15
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* 안내 문구 */}
+                  {/* 안내 */}
                   <div className="mb-2.5 text-center">
                     <p className="text-[13px] text-gray-600 leading-relaxed">
                       등록할 환자 정보를 정확히 입력하셨나요?
@@ -176,16 +193,13 @@ export default function VitalsConfirmModal({
                   <div className="flex gap-3">
                     <button
                       onClick={onClose}
-                      className="h-[40px] flex-[0.7] rounded-3xl border border-gray-300 text-gray-600 font-medium text-[15px] hover:bg-gray-50 transition-all"
+                      className="h-10 flex-[0.7] rounded-3xl border border-gray-300 text-gray-600 font-medium text-[15px] hover:bg-gray-50 transition-all"
                     >
                       ← 이전
                     </button>
                     <button
-                      onClick={() => {
-                        onConfirm();
-                        setIsLoading(true);
-                      }}
-                      className="h-[40px] flex-[1.5] rounded-3xl bg-gray-900 text-white font-medium text-[15px] hover:bg-gray-800 transition-all"
+                      onClick={handleConfirm}
+                      className="h-10 flex-[1.5] rounded-3xl bg-gray-900 text-white font-medium text-[15px] hover:bg-gray-800 transition-all"
                     >
                       확정하기
                     </button>
@@ -194,7 +208,7 @@ export default function VitalsConfirmModal({
               </motion.div>
             )}
 
-            {/* 로딩 애니메이션 */}
+            {/* 로딩 상태 */}
             {isLoading && (
               <motion.div
                 initial={{ opacity: 0 }}
@@ -207,17 +221,14 @@ export default function VitalsConfirmModal({
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="bg-white rounded-3xl w-[85%] max-w-[320px] h-[160px] flex flex-col items-center justify-center text-center shadow-2xl"
+                  className="bg-white rounded-3xl w-[85%] max-w-[320px] h-40 flex flex-col items-center justify-center text-center shadow-2xl"
                 >
                   <div className="flex gap-2 mb-4">
                     {[0, 1, 2].map((i) => (
                       <motion.div
                         key={i}
                         className="w-3 h-3 rounded-full bg-[#1778FF]"
-                        animate={{
-                          y: [0, -6, 0],
-                          opacity: [0.6, 1, 0.6],
-                        }}
+                        animate={{ y: [0, -6, 0], opacity: [0.6, 1, 0.6] }}
                         transition={{
                           duration: 0.8,
                           repeat: Infinity,
@@ -227,9 +238,8 @@ export default function VitalsConfirmModal({
                       />
                     ))}
                   </div>
-
                   <p className="text-[15px] font-medium text-[#1778FF]">
-                    입력하신 정보를 정리 중이에요...
+                    AI가 최적의 병원을 찾고 있어요...
                   </p>
                 </motion.div>
               </motion.div>
@@ -240,12 +250,13 @@ export default function VitalsConfirmModal({
 
       {/* 병원 추천 모달 */}
       <HospitalRecommendationModal
-        isOpen={showHospitalModal}
-        onClose={() => {
-          setShowHospitalModal(false);
-          onClose();
-        }}
-      />
+          isOpen={showHospitalModal}
+          onClose={() => {
+            setShowHospitalModal(false);
+            onClose();
+          }}
+          aiHospitals={aiHospitals ?? []}
+        />
     </>
   );
 }

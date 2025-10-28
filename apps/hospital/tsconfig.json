@@ -1,0 +1,15 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+      "outDir": "dist",
+      "rootDir": "src",
+      "jsx": "preserve",
+      "moduleResolution": "bundler",
+      "allowJs": true,
+      "esModuleInterop": true,
+      "strict": true
+    },
+    "include": ["src"],
+    "exclude": ["node_modules"]
+  }
+  
