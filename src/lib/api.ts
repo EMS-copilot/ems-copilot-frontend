@@ -1,7 +1,9 @@
 import apiClient from "./api-client";
 import axios from "axios";
 
-// 로그인 응답 타입
+/* -----------------------------------
+ * 로그인 응답 타입 정의
+ * ----------------------------------- */
 export interface LoginResponse {
   status: string;
   message: string;
@@ -14,7 +16,9 @@ export interface LoginResponse {
   };
 }
 
-// 로그인 요청
+/* -----------------------------------
+ * 로그인 요청
+ * ----------------------------------- */
 export const login = async (
   employeeNumber: string,
   password: string
@@ -26,11 +30,18 @@ export const login = async (
   return data;
 };
 
-// ✅ 구급대원 이름 조회 (수정됨: /api/users/me)
+/* -----------------------------------
+ * ✅ 구급대원 이름 조회 (SSR 안전 버전)
+ * - API: GET /api/users/me
+ * - 반환: data.name
+ * ----------------------------------- */
 export const getMyName = async () => {
+  // ✅ 서버사이드 렌더링 시 localStorage 접근 방지
+  if (typeof window === "undefined") {
+    console.warn("getMyName called on server — skipped localStorage access");
+    return null;
+  }
 
-  if (typeof window === "undefined") return null;
-  
   const token = localStorage.getItem("authToken");
   if (!token) throw new Error("No auth token found");
 
@@ -42,8 +53,8 @@ export const getMyName = async () => {
       },
     });
 
-    // ✅ data.name만 추출해서 반환
-    return response.data?.data?.name || null;
+    // ✅ data.name만 반환
+    return response.data?.data?.name ?? null;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
       console.error("getMyName failed:", error.response?.data || error.message);
@@ -56,9 +67,11 @@ export const getMyName = async () => {
   }
 };
 
-// ---- 환자 정보 등록 API: POST /api/patients/register ---- //
+/* -----------------------------------
+ * 환자 등록 API: POST /api/patients/register
+ * ----------------------------------- */
 
-// Request Body
+// Request Body 타입
 export interface RegisterPatientRequest {
   age: number;
   sex: "M" | "F";
@@ -95,7 +108,7 @@ export interface RegisterPatientResponse {
   };
 }
 
-// 환자 등록 함수
+// 환자 등록 요청
 export const registerPatient = async (
   payload: RegisterPatientRequest
 ): Promise<RegisterPatientResponse> => {
@@ -106,7 +119,9 @@ export const registerPatient = async (
   return data;
 };
 
-// 병원 목록 조회
+/* -----------------------------------
+ * 병원 목록 조회 API
+ * ----------------------------------- */
 export const getHospitals = async () => {
   const res = await apiClient.get("/hospitals");
   return res.data.data;
