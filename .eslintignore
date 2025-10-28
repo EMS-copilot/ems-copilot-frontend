@@ -1,0 +1,14 @@
+# 🔒 Next.js 빌드 결과물 무시
+.next/
+apps/**/.next/
+
+# ✅ 자동 생성 타입 파일 무시
+apps/**/next-env.d.ts
+apps/**/types/
+apps/**/dist/
+apps/**/out/
+
+# ✅ Node 및 빌드 산출물
+node_modules/
+dist/
+coverage/
