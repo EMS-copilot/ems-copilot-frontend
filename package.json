@@ -2,17 +2,16 @@
     "name": "ems-copilot-frontend",
     "private": true,
     "workspaces": [
-      "apps/*",
-      "packages/*"
+        "apps/*",
+        "packages/*"
     ],
     "devDependencies": {
-      "turbo": "^2.0.0"
+        "turbo": "^2.5.8"
     },
     "scripts": {
-      "dev:paramedic": "turbo run dev --filter=paramedic",
-      "dev:hospital": "turbo run dev --filter=hospital",
-      "build": "turbo run build",
-      "lint": "turbo run lint"
+        "dev:paramedic": "turbo run dev --filter=paramedic",
+        "dev:hospital": "turbo run dev --filter=hospital",
+        "build": "turbo run build",
+        "lint": "turbo run lint"
     }
-  }
-  
+}
