@@ -1,6 +1,7 @@
 {
     "name": "ems-copilot-frontend",
     "private": true,
+    "packageManager": "npm@11.6.0",
     "workspaces": [
         "apps/*",
         "packages/*"
