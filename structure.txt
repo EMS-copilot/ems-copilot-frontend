@@ -1,0 +1,62 @@
+.
+├── README.md
+├── eslint.config.mjs
+├── next-env.d.ts
+├── next.config.ts
+├── package-lock.json
+├── package.json
+├── postcss.config.mjs
+├── public
+│   ├── Logo.png
+│   ├── Marker-icon.png
+│   ├── bell-ringing.png
+│   ├── female-filled.png
+│   ├── female-outline.png
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── lotties
+│   │   ├── ai-star.png
+│   │   ├── graph-awOHbcRwDL.png
+│   │   ├── graph.json
+│   │   ├── radar-searsh-9O0wx6hPMY.png
+│   │   ├── radar.json
+│   │   ├── requestmodal-icon.png
+│   │   └── severity-middle.png
+│   ├── male-filled.png
+│   ├── male-outline.png
+│   ├── next.svg
+│   ├── search.png
+│   ├── severity-vector1.png
+│   ├── severity-vector2.png
+│   ├── severity-vector3.png
+│   ├── symptoms-vector.png
+│   ├── vercel.svg
+│   └── window.svg
+├── src
+│   ├── app
+│   │   ├── add-patient
+│   │   ├── favicon.ico
+│   │   ├── home
+│   │   ├── hospital-recommendation
+│   │   ├── layout.tsx
+│   │   ├── login
+│   │   └── page.tsx
+│   ├── components
+│   │   └── common
+│   ├── hooks
+│   │   └── useKakaoMap.ts
+│   ├── lib
+│   │   ├── api-client.ts
+│   │   ├── api-hooks.ts
+│   │   └── api.ts
+│   ├── providers
+│   │   └── query-provider.tsx
+│   ├── styles
+│   │   └── globals.css
+│   ├── tailwind.config.ts
+│   └── types
+│       └── kakao-maps.d.ts
+├── structure.txt
+└── tsconfig.json
+
+16 directories, 44 files
