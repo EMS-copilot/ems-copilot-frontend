@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
 import Image from "next/image";
 import Header from "@/components/common/Header";
+import { motion } from "framer-motion";
 import { useSendHospitalRequest } from "@/lib/api-hooks";
 import toast from "react-hot-toast";
-import axios from "axios";
+import RequestConfirmModal from "./RequestConfirmModal";
+import RequestDeclineModal from "./RequestDeclineModal";
 
 // 🔹 추천 병원 기본 데이터 타입
 type RecommendedHospital = {
@@ -20,14 +21,7 @@ type RecommendedHospital = {
   eta: number;
 };
 
-// 🔹 환자 요약 정보 타입
-type Summary = {
-  severity: string;
-  symptoms: string[];
-  vitals: { id: string; label: string; value: number; unit: string }[];
-};
-
-// 🔹 내부 상태에서 사용하는 병원 카드용 타입
+// 🔹 내부 카드용 타입
 interface HospitalCard {
   id: string;
   name: string;
@@ -48,70 +42,65 @@ interface HospitalRecommendationModalProps {
   isOpen: boolean;
   onClose: () => void;
   aiHospitals: RecommendedHospital[];
-  summary?: Summary;
+  onRequestComplete?: () => void;
 }
 
 export default function HospitalRecommendationModal({
   isOpen,
   onClose,
   aiHospitals,
-  summary,
+  onRequestComplete,
 }: HospitalRecommendationModalProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [hospitalList, setHospitalList] = useState<HospitalCard[]>([]);
   const [selectedCount, setSelectedCount] = useState(0);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isDeclineOpen, setIsDeclineOpen] = useState(false);
+  const [declinedOnce, setDeclinedOnce] = useState(false); // ✅ 첫 요청 여부 추적
+  const [selectedHospitalsForConfirm, setSelectedHospitalsForConfirm] = useState<
+    { id: string; name: string; badgeColor: "green" | "purple"; badgeText: string }[]
+  >([]);
 
-  // ✅ 병원 요청 API 훅
   const sendRequestMutation = useSendHospitalRequest();
 
-  // ✅ aiHospitals → hospitalList 변환
+  // ✅ 세션 스토리지 상태 불러오기 (hydration 이후)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const flag = sessionStorage.getItem("ems:demoDeclinedOnce");
+      setDeclinedOnce(flag === "1");
+    }
+  }, []);
+
+  // ✅ AI 추천 → 카드 변환
   const hospitals = useMemo<HospitalCard[]>(() => {
-    console.log("🔄 [useMemo] aiHospitals 변환 시작");
-    console.log("aiHospitals:", aiHospitals);
-    
-    return (aiHospitals ?? []).map((h, index) => {
-      const badgeColor = h.priority <= 2 ? "green" : "purple" as const;
-      const badgeText = h.priority <= 2 ? "우수" : "보통";
-
-      // ✅ hospitalId를 문자열로 저장 (API 응답값 그대로 사용)
-      const hospitalId = String(h.hospitalId);
-      
-      console.log(`  → Hospital ${index}:`, {
-        original: h.hospitalId,
-        converted: hospitalId,
-        type: typeof hospitalId,
-        name: h.hospitalName
-      });
-
-      return {
-        id: hospitalId, // 문자열로 저장
-        name: h.hospitalName,
-        distance: `${h.distance}km`,
-        waitTime: `${h.eta}분`,
-        beds: "-",
-        departments: ["AI 추천", "가까운 거리", "수용 가능"],
-        treatments: ["응급", "심혈관", "외상"],
-        specialties: ["24시간 응급실 운영"],
-        checked: false,
-        badgeColor,
-        badgeText,
-        aiScore: h.aiScore,
-        priority: h.priority,
-      };
-    });
+    return (aiHospitals ?? []).map((h) => ({
+      id: String(h.hospitalId),
+      name: h.hospitalName,
+      distance: `${h.distance}km`,
+      waitTime: `${h.eta}분`,
+      beds: "-",
+      departments: ["AI 추천", "가까운 거리", "수용 가능"],
+      treatments: ["응급", "심혈관", "외상"],
+      specialties: ["24시간 응급실 운영"],
+      checked: false,
+      badgeColor: h.priority <= 2 ? "green" : "purple",
+      badgeText: h.priority <= 2 ? "여유" : "보통",
+      aiScore: h.aiScore,
+      priority: h.priority,
+    }));
   }, [aiHospitals]);
 
-  // ✅ 초기 렌더 시 로딩 세팅
+  // ✅ 초기 로딩
   useEffect(() => {
     if (!isOpen) return;
     setHospitalList(hospitals);
     setIsLoading(true);
-    const timer = setTimeout(() => setIsLoading(false), 1500);
+    const timer = setTimeout(() => setIsLoading(false), 1200);
     return () => clearTimeout(timer);
   }, [isOpen, hospitals]);
 
-  // ✅ 병원 선택 toggle
+  // ✅ 체크 토글
   const toggleHospital = (id: string) => {
     setHospitalList((prev) => {
       const updated = prev.map((h) =>
@@ -122,144 +111,73 @@ export default function HospitalRecommendationModal({
     });
   };
 
-  // ✅ 병원 요청 전송 함수 (개선된 버전)
+  // ✅ 요청 처리 로직 (거절 → 재추천 → 정상)
   const handleSendRequest = async (hospitalIds: (string | number)[]) => {
     try {
-      // 1️⃣ 세션 코드 확인
       const sessionCode = localStorage.getItem("currentSessionCode");
-      
-      console.log("🔍 [요청 전송 전 검증 - RAW]");
-      console.log("sessionCode:", sessionCode);
-      console.log("hospitalIds (raw):", hospitalIds);
-      console.log("hospitalIds types:", hospitalIds.map(id => `${id} (${typeof id})`));
-
       if (!sessionCode) {
         toast.error("세션 코드가 없습니다. 환자를 다시 등록해주세요.");
         return;
       }
 
-      // 2️⃣ hospitalIds를 정수로 변환 (parseInt 사용)
-      const validHospitalIds = hospitalIds
-        .map(id => {
-          // 문자열이든 숫자든 parseInt로 변환
-          const num = parseInt(String(id), 10);
-          console.log(`Converting: ${id} → ${num} (isNaN: ${isNaN(num)})`);
-          
-          if (isNaN(num) || num <= 0) {
-            console.error(`❌ Invalid hospital ID: ${id} → ${num}`);
-            return null;
-          }
-          return num;
-        })
-        .filter((id): id is number => id !== null && id > 0);
+      const validIds = hospitalIds
+        .map((id) => parseInt(String(id), 10))
+        .filter((id) => !isNaN(id) && id > 0);
 
-      console.log("✅ Valid hospital IDs:", validHospitalIds);
-
-      if (validHospitalIds.length === 0) {
+      if (validIds.length === 0) {
         toast.error("유효한 병원을 선택해주세요.");
-        console.error("❌ No valid hospital IDs after conversion");
         return;
       }
 
-      // 3️⃣ 요청 Body 구성
-      const body = {
-        sessionCode: sessionCode,
-        hospitalIds: validHospitalIds
-      };
+      // ✅ 첫 요청 → 거절 모달 (무조건 한 번은 뜸)
+      if (!declinedOnce) {
+        sessionStorage.setItem("ems:demoDeclinedOnce", "1");
+        setDeclinedOnce(true);
+        setIsConfirmOpen(false);
+        setIsDeclineOpen(true);
+        return;
+      }
 
-      console.log("📦 [최종 전송 Body]:", JSON.stringify(body, null, 2));
-      console.log("📦 [Body 타입 확인]:", {
-        sessionCode: typeof body.sessionCode,
-        hospitalIds: body.hospitalIds.map(id => `${id} (${typeof id})`)
-      });
-
-      // 4️⃣ API 호출
+      // ✅ 두 번째 요청 → 실제 요청
+      const body = { sessionCode, hospitalIds: validIds };
       await sendRequestMutation.mutateAsync(body);
 
-      // 5️⃣ 성공 처리
-      toast.success("병원으로 환자 정보가 전송되었습니다.");
+      toast.success("요청을 성공적으로 전송했어요!");
+      localStorage.setItem("ems:showOngoing", "1");
+
+      setIsConfirmOpen(false);
       onClose();
+      onRequestComplete?.();
       router.push("/");
-      
     } catch (err) {
-      console.error("❌ [handleSendRequest] 에러:", err);
-      
-      if (axios.isAxiosError(err)) {
-        const status = err.response?.status;
-        const errorData = err.response?.data;
-        
-        console.error("📍 에러 상세:");
-        console.error("- Status:", status);
-        console.error("- Data:", errorData);
-        console.error("- Headers:", err.config?.headers);
-        
-        if (status === 500) {
-          const message = errorData?.message || "서버 오류가 발생했습니다.";
-          toast.error(message);
-        } else if (status === 403) {
-          toast.error("권한이 없습니다. 다시 로그인해주세요.");
-        } else if (status === 400) {
-          const message = errorData?.message || "요청 형식이 잘못되었습니다.";
-          toast.error(message);
-        } else if (status === 404) {
-          toast.error("세션을 찾을 수 없습니다. 환자를 다시 등록해주세요.");
-        } else {
-          toast.error("요청 전송 중 오류가 발생했습니다.");
-        }
-      } else {
-        toast.error("네트워크 오류가 발생했습니다.");
-      }
+      console.error(err);
+      toast.error("요청 전송 중 오류가 발생했습니다.");
     }
   };
 
-  // ✅ 단일 병원 요청
-  const handleSendSingle = (hospitalId: string) => {
-    console.log("🔵 [handleSendSingle] 호출됨");
-    console.log("- hospitalId (raw):", hospitalId, typeof hospitalId);
-    
-    const numId = parseInt(hospitalId, 10);
-    console.log("- hospitalId (converted):", numId, typeof numId);
-    
-    if (isNaN(numId) || numId <= 0) {
-      console.error("❌ 잘못된 병원 ID:", hospitalId);
-      toast.error("잘못된 병원 ID입니다.");
-      return;
-    }
-    
-    handleSendRequest([numId]);
-  };
-
-  // ✅ 선택된 병원 전체 요청
+  // ✅ 다중 선택
   const handleSendSelected = () => {
-    console.log("🟢 [handleSendSelected] 호출됨");
-    console.log("- hospitalList:", hospitalList.map(h => ({ id: h.id, checked: h.checked })));
-    
     const selectedHospitals = hospitalList.filter((h) => h.checked);
-    console.log("- selectedHospitals:", selectedHospitals);
-    
-    const selectedIds = selectedHospitals
-      .map((h) => {
-        const numId = parseInt(h.id, 10);
-        console.log(`  → Converting: ${h.id} (${h.name}) → ${numId}`);
-        return numId;
-      })
-      .filter(id => !isNaN(id) && id > 0);
-    
-    console.log("- selectedIds (final):", selectedIds);
-      
-    if (selectedIds.length === 0) {
+    if (selectedHospitals.length === 0) {
       toast.error("병원을 선택해주세요.");
       return;
     }
-    
-    handleSendRequest(selectedIds);
+    setSelectedHospitalsForConfirm(
+      selectedHospitals.map((h) => ({
+        id: h.id,
+        name: h.name,
+        badgeColor: h.badgeColor,
+        badgeText: h.badgeText,
+      }))
+    );
+    setIsConfirmOpen(true);
   };
 
   if (!isOpen) return null;
 
   return (
     <>
-      {/* 로딩 화면 */}
+      {/* ✅ 로딩 */}
       {isLoading && (
         <div className="fixed inset-0 bg-[#F7F7F7] z-60 flex justify-center">
           <div className="w-full max-w-[393px] flex flex-col">
@@ -275,7 +193,6 @@ export default function HospitalRecommendationModal({
                   alt="AI 분석 중"
                   width={80}
                   height={80}
-                  className="object-contain"
                 />
               </motion.div>
               <h2 className="text-[20px] font-bold text-gray-900 mb-2 text-center">
@@ -289,43 +206,16 @@ export default function HospitalRecommendationModal({
         </div>
       )}
 
-      {/* 병원 목록 */}
-      {!isLoading && (
+      {/* ✅ 병원 카드 목록 (UI 그대로 유지) */}
+      {!isLoading && !isConfirmOpen && (
         <>
           <div className="fixed inset-0 bg-black/30 z-55" onClick={onClose} />
           <div className="fixed inset-0 flex justify-center z-58 pointer-events-none">
             <div className="w-full max-w-[393px] h-full relative pointer-events-auto flex flex-col">
               <Header variant="sub" title="새 환자 등록" />
-
-              {/* 상단 요약 */}
-              {summary && (
-                <div className="bg-white border-b border-gray-200 px-5 py-3 flex flex-wrap gap-2">
-                  <span
-                    className={`px-3 h-7 inline-flex items-center rounded-xl text-[12px] ${
-                      summary.severity === "위급"
-                        ? "bg-[#FB4D40] text-white"
-                        : summary.severity === "긴급"
-                        ? "bg-[#FFA034] text-white"
-                        : "bg-[#27A959] text-white"
-                    }`}
-                  >
-                    {summary.severity}
-                  </span>
-                  {summary.symptoms.slice(0, 2).map((s, i) => (
-                    <span
-                      key={i}
-                      className="px-3 h-7 inline-flex items-center rounded-xl text-[12px] bg-[#E3F2FD] text-[#1778FF]"
-                    >
-                      {s}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              {/* 콘텐츠 */}
               <div className="flex-1 bg-[#F7F7F7] rounded-t-3xl overflow-hidden flex flex-col mt-15">
                 <div className="flex-1 overflow-y-auto px-5 py-6">
-                  {/* 상단 타이틀 */}
+                  {/* 헤더 */}
                   <div className="flex items-center gap-2 mb-4">
                     <Image
                       src="/lotties/ai-star.png"
@@ -339,7 +229,7 @@ export default function HospitalRecommendationModal({
                     </span>
                   </div>
 
-                  {/* 모두 선택 */}
+                  {/* 전체선택 */}
                   <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
                     <div className="flex items-center gap-2">
                       <input
@@ -370,7 +260,7 @@ export default function HospitalRecommendationModal({
                     </span>
                   </div>
 
-                  {/* 병원 카드 리스트 */}
+                  {/* 병원 카드 */}
                   <div className="space-y-3 pb-2">
                     {hospitalList.map((hospital, idx) => (
                       <div
@@ -383,16 +273,14 @@ export default function HospitalRecommendationModal({
                             type="checkbox"
                             checked={hospital.checked}
                             onChange={() => toggleHospital(hospital.id)}
-                            className="mt-1.5 w-4 h-4 rounded border-gray-200 text-[#1778FF] focus:ring-[#1778FF] shrink-0"
+                            className="mt-1.5 w-4 h-4 rounded border-gray-200 text-[#1778FF] focus:ring-[#1778FF]"
                           />
                           <div className="flex-1 flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2">
-                              <h3 className="text-[16px] font-semibold text-black">
-                                {hospital.name}
-                              </h3>
-                            </div>
+                            <h3 className="text-[16px] font-semibold text-black">
+                              {hospital.name}
+                            </h3>
                             <span
-                              className={`px-3 py-1 rounded-full text-[13px] font-medium shrink-0 ${
+                              className={`px-3 py-1 rounded-full text-[13px] font-medium ${
                                 hospital.badgeColor === "green"
                                   ? "bg-[#E8F5E9] text-[#27A959]"
                                   : "bg-[#F3E5F5] text-[#9C27B0]"
@@ -403,13 +291,14 @@ export default function HospitalRecommendationModal({
                           </div>
                         </div>
 
-                        {/* 병원 정보 */}
+                        {/* 특이사항 */}
                         <div className="bg-[#F7F7F7] rounded-lg px-3 py-2.5 mb-2 flex items-center">
                           <p className="text-[13px] font-medium text-gray-700">
                             {hospital.specialties[0]}
                           </p>
                         </div>
 
+                        {/* 치료 가능 시술 */}
                         <div className="bg-[#F7F7F7] rounded-lg px-3 py-2.5 mb-4 flex items-center">
                           <span className="text-[13px] font-medium text-gray-600 mr-1.5">
                             치료 가능 시술 :
@@ -429,7 +318,7 @@ export default function HospitalRecommendationModal({
                           </div>
                         </div>
 
-                        {/* 거리 / 시간 */}
+                        {/* 거리 정보 */}
                         <div className="grid grid-cols-3 mb-4 divide-x divide-gray-200">
                           <div className="text-center px-1">
                             <p className="text-[13px] text-gray-500">총 거리</p>
@@ -477,7 +366,7 @@ export default function HospitalRecommendationModal({
                         <div className="flex gap-2">
                           <button
                             type="button"
-                            className="w-[73px] py-2.5 rounded-xl border border-gray-300 text-gray-700 text-[13px] font-medium hover:bg-gray-50 transition-colors"
+                            className="w-[73px] py-2.5 rounded-xl border border-gray-300 text-gray-700 text-[13px] font-medium hover:bg-gray-50"
                           >
                             문의
                           </button>
@@ -486,9 +375,17 @@ export default function HospitalRecommendationModal({
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              handleSendSingle(hospital.id);
+                              setSelectedHospitalsForConfirm([
+                                {
+                                  id: hospital.id,
+                                  name: hospital.name,
+                                  badgeColor: hospital.badgeColor,
+                                  badgeText: hospital.badgeText,
+                                },
+                              ]);
+                              setIsConfirmOpen(true);
                             }}
-                            className="w-[244px] py-2.5 rounded-xl bg-gray-800 text-white text-[13px] font-medium hover:bg-gray-900 transition-colors"
+                            className="w-[244px] py-2.5 rounded-xl bg-gray-800 text-white text-[13px] font-medium hover:bg-gray-900"
                           >
                             요청 보내기
                           </button>
@@ -498,16 +395,12 @@ export default function HospitalRecommendationModal({
                   </div>
                 </div>
 
-                {/* 하단 고정 버튼 */}
+                {/* 하단 버튼 */}
                 <div className="bg-white border-t border-gray-200 px-5 py-4">
                   <button
                     type="button"
                     disabled={selectedCount === 0}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleSendSelected();
-                    }}
+                    onClick={handleSendSelected}
                     className={`w-full py-4 rounded-xl font-semibold text-[15px] transition-all ${
                       selectedCount > 0
                         ? "bg-[#1778FF] text-white hover:bg-[#0D66E8]"
@@ -522,6 +415,28 @@ export default function HospitalRecommendationModal({
           </div>
         </>
       )}
+
+      {/* ✅ 확인 모달 */}
+      <RequestConfirmModal
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        selectedHospitals={selectedHospitalsForConfirm}
+        onConfirm={() => {
+          const ids = selectedHospitalsForConfirm.map((h) => parseInt(h.id, 10));
+          handleSendRequest(ids);
+        }}
+      />
+
+      {/* ✅ 거절 모달 */}
+      <RequestDeclineModal
+        isOpen={isDeclineOpen}
+        onRetry={() => {
+          setIsDeclineOpen(false);
+          setIsLoading(true);
+          setTimeout(() => setIsLoading(false), 1000);
+        }}
+        onClose={() => setIsDeclineOpen(false)}
+      />
     </>
   );
 }

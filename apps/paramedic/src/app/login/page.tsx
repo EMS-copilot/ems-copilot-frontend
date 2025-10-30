@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useLogin } from "@/lib/api-hooks";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { mutateAsync: login } = useLogin(); 
+  const { mutateAsync: login } = useLogin();
 
   const [organization, setOrganization] = useState("");
   const [showOrgDropdown, setShowOrgDropdown] = useState(false);
@@ -15,7 +15,14 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  // 소속 목록 (표시용)
+  // ✅ 스플래시 상태
+  const [isSplashVisible, setIsSplashVisible] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsSplashVisible(false), 3000); // 3초 후 로그인 화면 표시
+    return () => clearTimeout(timer);
+  }, []);
+
   const organizations = [
     "음성소방서금왕119안전센터",
     "음성소방서감곡119안전센터",
@@ -23,27 +30,15 @@ export default function LoginPage() {
     "음성소방서음성119지역대",
   ];
 
-  // 로그인 처리 함수
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    // 유효성 검사
-    if (!organization) {
-      setError("소속을 선택해주세요.");
-      return;
-    }
-    if (!employeeId) {
-      setError("사번을 입력해주세요.");
-      return;
-    }
-    if (!password) {
-      setError("비밀번호를 입력해주세요.");
-      return;
-    }
+    if (!organization) return setError("소속을 선택해주세요.");
+    if (!employeeId) return setError("사번을 입력해주세요.");
+    if (!password) return setError("비밀번호를 입력해주세요.");
 
     try {
-      // ✅ 실제 API 호출
       const response = await login({
         employeeNumber: employeeId,
         password,
@@ -52,7 +47,6 @@ export default function LoginPage() {
       if (response.status === "SUCCESS") {
         const user = response.data;
 
-        // ✅ 토큰 및 사용자 정보 저장
         localStorage.setItem("authToken", user.token);
         localStorage.setItem(
           "userInfo",
@@ -65,17 +59,48 @@ export default function LoginPage() {
           })
         );
 
-        // ✅ 홈으로 이동
         router.push("/");
       } else {
         setError("로그인에 실패했습니다. 다시 시도해주세요.");
       }
-    } catch (_err) {
-      console.error("로그인 실패:", _err);
+    } catch (err) {
+      console.error("로그인 실패:", err);
       setError("서버 연결에 실패했습니다. 다시 시도해주세요.");
     }
   };
 
+  // ✅ 1️⃣ 스플래시 화면
+  if (isSplashVisible) {
+    return (
+      <div className="w-full max-w-[393px] mx-auto min-h-screen bg-white flex flex-col justify-center items-center">
+        <div className="flex flex-col items-center justify-center text-center">
+          <Image
+            src="/Logo.png"
+            alt="로고"
+            width={100}
+            height={100}
+            className="mb-6"
+            priority
+          />
+          <h1 className="text-[20px] font-bold text-gray-900 mb-2">
+            EMS Copilot Korea
+          </h1>
+          <p className="text-[14px] text-gray-400">
+            앱이 시작되고 있어요. 잠시만 기다려주세요.
+          </p>
+        </div>
+
+        <div className="absolute bottom-10 text-center">
+          <p className="text-[12px] text-gray-400">버전 1.2.4</p>
+          <p className="text-[12px] text-gray-300 mt-1">
+            © 2024 EMS Copilot Korea
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // ✅ 2️⃣ 로그인 화면
   return (
     <div className="w-full max-w-[393px] mx-auto min-h-screen bg-white flex flex-col">
       {/* 로고 영역 */}
@@ -115,9 +140,7 @@ export default function LoginPage() {
                 className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-left text-sm text-gray-700 flex items-center justify-between hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <span
-                  className={
-                    organization ? "text-gray-900" : "text-gray-400"
-                  }
+                  className={organization ? "text-gray-900" : "text-gray-400"}
                 >
                   {organization || "소속을 선택해주세요."}
                 </span>
@@ -138,7 +161,6 @@ export default function LoginPage() {
                 </svg>
               </button>
 
-              {/* 드롭다운 메뉴 */}
               {showOrgDropdown && (
                 <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg">
                   {organizations.map((org) => (

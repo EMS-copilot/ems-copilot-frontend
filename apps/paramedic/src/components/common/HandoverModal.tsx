@@ -18,7 +18,7 @@ export default function HandoverModal({
   return (
     <>
       {/* 배경 오버레이 */}
-      <div className="fixed inset-0 bg-black/40 z-[95]" onClick={onClose} />
+      <div className="fixed inset-0 bg-black/40 z-95" onClick={onClose} />
 
       {/* 모달 */}
       <motion.div
@@ -31,7 +31,7 @@ export default function HandoverModal({
         w-[393px] h-[750px]
         bg-white rounded-t-3xl
         shadow-[0_-4px_12px_rgba(0,0,0,0.1)]
-        z-[100]
+        z-100
         flex flex-col overflow-hidden
       "
       >
@@ -195,7 +195,7 @@ export default function HandoverModal({
         <div className="bg-white px-5 py-4">
           <button
             onClick={onConfirm}
-            className="w-full h-[48px] bg-gray-900 text-white rounded-2xl text-[15px] font-semibold hover:bg-gray-800 transition-all"
+            className="w-full h-12 bg-gray-900 text-white rounded-2xl text-[15px] font-semibold hover:bg-gray-800 transition-all"
           >
             병원 확정하기
           </button>

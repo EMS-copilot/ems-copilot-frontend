@@ -43,7 +43,7 @@ export default function FloatingButton({
               fixed right-[calc(50%-196.5px+20px)]
               bg-white rounded-2xl shadow-lg p-2
               flex flex-col gap-2
-              z-[70]
+              z-70
               transition-all duration-300
             "
             style={{ bottom: menuBottom }}
@@ -76,13 +76,13 @@ export default function FloatingButton({
         onClick={() => setIsOpen(!isOpen)}
         className="
           fixed right-[calc(50%-196.5px+20px)]
-          w-[56px] h-[56px]
+          w-14 h-14
           bg-black text-white rounded-full
           flex items-center justify-center
           shadow-lg
           hover:bg-gray-800 active:scale-95
           transition-all duration-300
-          z-[80]
+          z-80
         "
         style={{ bottom: buttonBottom }}
       >

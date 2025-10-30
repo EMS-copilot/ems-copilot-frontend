@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 interface Hospital {
   id: string;
   name: string;
-  type?: string;
   badgeColor: "green" | "purple";
   badgeText: string;
 }
@@ -18,20 +18,23 @@ interface RequestConfirmModalProps {
   selectedHospitals: Hospital[];
 }
 
-function RequestConfirmModal({
+export default function RequestConfirmModal({
   isOpen,
   onClose,
   onConfirm,
   selectedHospitals,
 }: RequestConfirmModalProps) {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const router = useRouter();
 
   const handleConfirm = () => {
+    onConfirm();
     setShowSuccessModal(true);
   };
 
   return (
     <AnimatePresence>
+      {/* 확인 모달 */}
       {isOpen && !showSuccessModal && (
         <>
           <motion.div
@@ -41,13 +44,12 @@ function RequestConfirmModal({
             onClick={onClose}
             className="fixed inset-0 bg-black/40 z-70"
           />
-
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.2 }}
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] max-w-[364px] bg-white rounded-3xl shadow-2xl z-75verflow-hidden"
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] max-w-[364px] bg-white rounded-3xl shadow-2xl z-75 overflow-hidden"
           >
             <div className="px-6 pt-6 pb-6">
               <h3 className="text-[18px] font-semibold text-black mb-4">
@@ -64,23 +66,13 @@ function RequestConfirmModal({
                       <span className="text-[15px] font-semibold text-gray-900">
                         {hospital.name}
                       </span>
-                      <span className="text-[13px] text-gray-400">
-                        {hospital.type}
-                      </span>
                     </div>
                     <span
-                      className={`px-3 py-1 rounded text-[13px] font-medium shrink-0
+                      className={`px-3 py-1 rounded text-[13px] font-medium ${
                         hospital.badgeColor === "green"
                           ? "bg-[#E8F5E9] text-[#27A959]"
                           : "bg-[#F3E5F5] text-[#9C27B0]"
                       }`}
-                      style={{
-                        width: "47px",
-                        height: "28px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
                     >
                       {hospital.badgeText}
                     </span>
@@ -95,13 +87,13 @@ function RequestConfirmModal({
               <div className="flex gap-3">
                 <button
                   onClick={onClose}
-                  className="flex-1 h-12nded-full border-2 border-gray-200 text-gray-400 font-medium text-[15px] hover:bg-gray-50 transition-all flex items-center justify-center"
+                  className="flex-1 h-12 rounded-full border-2 border-gray-200 text-gray-400 font-medium text-[15px] hover:bg-gray-50"
                 >
                   이전
                 </button>
                 <button
                   onClick={handleConfirm}
-                  className="flex-2-h-12ounded-full bg-gray-900 text-white font-semibold text-[15px] hover:bg-gray-800 flex items-center justify-center transition-all"
+                  className="flex-1 h-12 rounded-full bg-gray-900 text-white font-semibold text-[15px] hover:bg-gray-800"
                 >
                   요청 보내기
                 </button>
@@ -120,7 +112,6 @@ function RequestConfirmModal({
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/40 z-80"
           />
-
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -129,7 +120,6 @@ function RequestConfirmModal({
             className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] max-w-[300px] bg-white rounded-3xl shadow-2xl z-85 overflow-hidden"
           >
             <div className="px-8 py-10 flex flex-col items-center">
-              {/* 체크 아이콘 */}
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
@@ -156,13 +146,13 @@ function RequestConfirmModal({
               <h3 className="text-[18px] font-bold text-gray-900 mb-2">
                 요청을 성공적으로 전송했어요!
               </h3>
-              
+
               <button
                 onClick={() => {
                   setShowSuccessModal(false);
-                  onConfirm();
+                  router.push("/");
                 }}
-                className="mt-4 w-full h-11 rounded-full bg-[#F7F7F7] text-gray-700 font-medium text-[15px] hover:bg-gray-200 transition-all"
+                className="mt-4 w-full h-11 rounded-full bg-[#F7F7F7] text-gray-700 font-medium text-[15px] hover:bg-gray-200"
               >
                 홈에서 대기하기
               </button>
@@ -173,5 +163,3 @@ function RequestConfirmModal({
     </AnimatePresence>
   );
 }
-
-export default RequestConfirmModal;

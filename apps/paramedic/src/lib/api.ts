@@ -1,3 +1,4 @@
+// src/api/api.ts
 import apiClient from "./api-client";
 import axios from "axios";
 
@@ -32,11 +33,8 @@ export const login = async (
 
 /* -----------------------------------
  * ✅ 구급대원 이름 조회 (SSR 안전 버전)
- * - API: GET /api/users/me
- * - 반환: data.name
  * ----------------------------------- */
 export const getMyName = async () => {
-  // ✅ 서버사이드 렌더링 시 localStorage 접근 방지
   if (typeof window === "undefined") {
     console.warn("getMyName called on server — skipped localStorage access");
     return null;
@@ -52,8 +50,6 @@ export const getMyName = async () => {
         "Content-Type": "application/json",
       },
     });
-
-    // ✅ data.name만 반환
     return response.data?.data?.name ?? null;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
@@ -68,10 +64,8 @@ export const getMyName = async () => {
 };
 
 /* -----------------------------------
- * 환자 등록 API: POST /api/patients/register
+ * 환자 등록
  * ----------------------------------- */
-
-// Request Body 타입
 export interface RegisterPatientRequest {
   age: number;
   sex: "M" | "F";
@@ -85,7 +79,6 @@ export interface RegisterPatientRequest {
   symptoms: string[];
 }
 
-// Response 타입
 export interface RegisterPatientResponse {
   status: string;
   message: string;
@@ -109,7 +102,6 @@ export interface RegisterPatientResponse {
   };
 }
 
-// 환자 등록 요청
 export const registerPatient = async (
   payload: RegisterPatientRequest
 ): Promise<RegisterPatientResponse> => {
@@ -120,23 +112,20 @@ export const registerPatient = async (
   return data;
 };
 
-// 병원 목록 조회 API
+/* -----------------------------------
+ * 병원/요청
+ * ----------------------------------- */
 export const getHospitals = async () => {
   const res = await apiClient.get("/api/hospitals");
   return res.data.data;
 };
 
-// 거리 기반 병원 조회
 export const getNearbyHospitals = async (distance: number = 10) => {
   const response = await apiClient.get(`/api/hospitals/nearby`, {
     params: { distance },
   });
-  return response.data; // { status, message, data: Hospital[] }
+  return response.data;
 };
-
-/* -----------------------------------
- * ✅ 병원 요청 전송 API (수정됨)
- * ----------------------------------- */
 
 export interface SendHospitalRequestBody {
   sessionCode: string;
@@ -170,19 +159,17 @@ export interface SendHospitalRequestResponse {
   };
 }
 
-// ✅ 병원 요청 전송 (개선된 버전)
 export const sendHospitalRequest = async (
   payload: SendHospitalRequestBody
 ): Promise<SendHospitalRequestResponse> => {
   console.log("📤 [sendHospitalRequest] 요청 시작");
   console.log("📦 Payload:", JSON.stringify(payload, null, 2));
-  
-  // ✅ hospitalIds가 숫자 배열인지 확인
+
   const validPayload = {
     sessionCode: String(payload.sessionCode),
-    hospitalIds: payload.hospitalIds.map(id => Number(id))
+    hospitalIds: payload.hospitalIds.map((id) => Number(id)),
   };
-  
+
   console.log("✅ Validated Payload:", JSON.stringify(validPayload, null, 2));
 
   try {
@@ -201,4 +188,73 @@ export const sendHospitalRequest = async (
     }
     throw error;
   }
+};
+
+/* -----------------------------------
+ * ✅ 음성 → 텍스트(STT) 업로드
+ *   POST /api/speech/transcribe  (multipart/form-data)
+ *   반환: { status, message, data: { transcript, confidence, ... } }
+ * ----------------------------------- */
+export interface SpeechTranscribeResponse {
+  status: "SUCCESS" | "FAIL";
+  message: string;
+  data?: {
+    transcript: string;
+    confidence?: number;
+    alternatives?: { transcript: string; confidence?: number }[];
+  };
+}
+
+export const postSpeechTranscribe = async (
+  audioFile: Blob,
+  options?: {
+    languageCode?: string; // default ko-KR
+    sampleRateHz?: number; // default 44100
+    encoding?: "MP3" | "WAV" | "FLAC" | "OGG";
+  }
+): Promise<SpeechTranscribeResponse> => {
+  const formData = new FormData();
+  // 서버가 파일 키를 audioFile로 받음
+  formData.append("audioFile", audioFile, "voice.ogg");
+  formData.append("languageCode", options?.languageCode ?? "ko-KR");
+  formData.append("sampleRateHz", String(options?.sampleRateHz ?? 48000));
+  formData.append("encoding", options?.encoding ?? "OGG");
+
+  const { data } = await apiClient.post<SpeechTranscribeResponse>(
+    "/api/speech/transcribe",
+    formData,
+    {
+      headers: {
+        // apiClient 기본 헤더가 json이라 multipart로 덮어써줌
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+  return data;
+};
+
+/* -----------------------------------
+ * ✅ 메모 저장 (세션 기준)
+ *   POST /api/patients/memo
+ *   body: { sessionCode, memo }
+ *   ※ 실제 엔드포인트가 다르면 이 부분만 바꿔줘.
+ * ----------------------------------- */
+export interface SaveMemoResponse {
+  status: "SUCCESS" | "FAIL";
+  message: string;
+  data?: { sessionCode: string; memo: string; savedAt: string };
+}
+
+export const postPatientMemo = async ({
+  sessionCode,
+  memo,
+}: {
+  sessionCode: string;
+  memo: string;
+}): Promise<SaveMemoResponse> => {
+  const { data } = await apiClient.post<SaveMemoResponse>(
+    "/api/patients/memo",
+    { sessionCode, memo }
+  );
+  return data;
 };
