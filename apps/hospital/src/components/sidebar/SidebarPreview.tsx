@@ -14,7 +14,7 @@ declare global {
 
 export default function SidebarPreview() {
   const mapRef = useRef<HTMLDivElement>(null);
-  const isLoaded = useKakaoMap();
+  const isLoaded = useKakaoMap(); // ✅ SDK 로드 확인
   const [eta, setEta] = useState<number | null>(null);
   const [distance, setDistance] = useState<number | null>(null);
 
@@ -35,8 +35,14 @@ export default function SidebarPreview() {
     });
 
     // ✅ 마커 표시
-    new kakao.maps.Marker({ position: new kakao.maps.LatLng(origin.lat, origin.lng), map });
-    new kakao.maps.Marker({ position: new kakao.maps.LatLng(destination.lat, destination.lng), map });
+    new kakao.maps.Marker({
+      position: new kakao.maps.LatLng(origin.lat, origin.lng),
+      map,
+    });
+    new kakao.maps.Marker({
+      position: new kakao.maps.LatLng(destination.lat, destination.lng),
+      map,
+    });
 
     // ✅ 경로 API 호출
     const fetchRoute = async () => {
@@ -45,7 +51,7 @@ export default function SidebarPreview() {
           `https://apis-navi.kakaomobility.com/v1/directions?origin=${origin.lng},${origin.lat}&destination=${destination.lng},${destination.lat}&priority=RECOMMEND`,
           {
             headers: {
-              Authorization: `KakaoAK ${process.env.NEXT_PUBLIC_KAKAO_REST_KEY}`, // ✅ REST API 키 사용
+              Authorization: `KakaoAK ${process.env.NEXT_PUBLIC_KAKAO_REST_KEY}`, // ✅ REST 키
               "Content-Type": "application/json",
             },
           }
@@ -84,7 +90,7 @@ export default function SidebarPreview() {
         });
         polyline.setMap(map);
 
-        // ✅ 전체 경로 보기
+        // ✅ 경로 전체 보기
         const bounds = new kakao.maps.LatLngBounds();
         linePath.forEach((p) => bounds.extend(p));
         map.setBounds(bounds);
@@ -100,12 +106,20 @@ export default function SidebarPreview() {
     <div className="col-span-3 flex flex-col gap-6">
       <HospitalCardDashboard />
 
+      {/* 지도 카드 */}
       <div className="w-[514px] h-[599px] bg-white rounded-[20px] shadow-sm border border-gray-100 p-6 font-['Pretendard'] relative overflow-hidden">
         {/* 헤더 */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Image src="/Waiting.png" alt="병원 수용 능력" width={20} height={20} />
-            <h2 className="text-lg font-semibold text-gray-900">실시간 현황 지도</h2>
+            <Image
+              src="/Waiting.png"
+              alt="병원 수용 능력"
+              width={20}
+              height={20}
+            />
+            <h2 className="text-lg font-semibold text-gray-900">
+              실시간 현황 지도
+            </h2>
           </div>
 
           {/* 범례 */}
@@ -127,7 +141,10 @@ export default function SidebarPreview() {
 
         {/* 지도 */}
         <div className="relative w-full h-[495px] rounded-xl overflow-hidden">
-          <div ref={mapRef} className="absolute inset-0 mx-1 rounded-lg overflow-hidden" />
+          <div
+            ref={mapRef}
+            className="absolute inset-0 mx-1 rounded-lg overflow-hidden"
+          />
 
           {/* 예상 도착 시간 오버레이 */}
           <div className="absolute bottom-5 left-1/2 -translate-x-1/2 w-[85%] bg-white/95 backdrop-blur-sm border border-gray-200 rounded-2xl shadow-md px-6 py-3 flex items-start justify-between z-[10]">
