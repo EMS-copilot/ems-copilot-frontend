@@ -10,7 +10,7 @@ export default function HospitalInfo() {
       <div className="flex items-center gap-3 mb-8">
         <Image src="/medal.png" alt="병원 로고" width={46} height={56} />
         <h2 className="text-[32px] font-bold text-gray-900">
-          충북대학교병원 응급의료센터
+          경기도 의료원 이천병원 응급실
         </h2>
       </div>
 

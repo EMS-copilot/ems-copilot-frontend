@@ -50,3 +50,14 @@ export const useHospitals = () => {
     retry: false,
   });
 };
+
+// 병원 요청 전송 훅
+export const useSendHospitalRequest = () => {
+  return useMutation<
+    api.SendHospitalRequestResponse,
+    Error,
+    api.SendHospitalRequestBody
+  >({
+    mutationFn: api.sendHospitalRequest,
+  });
+};

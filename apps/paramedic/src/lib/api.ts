@@ -90,6 +90,7 @@ export interface RegisterPatientResponse {
   status: string;
   message: string;
   data: {
+    data: any;
     sessionCode: string;
     patientCode: string;
     patientTempId: string;
@@ -131,4 +132,73 @@ export const getNearbyHospitals = async (distance: number = 10) => {
     params: { distance },
   });
   return response.data; // { status, message, data: Hospital[] }
+};
+
+/* -----------------------------------
+ * ✅ 병원 요청 전송 API (수정됨)
+ * ----------------------------------- */
+
+export interface SendHospitalRequestBody {
+  sessionCode: string;
+  hospitalIds: number[];
+}
+
+export interface SendHospitalRequestResponse {
+  status: string;
+  message: string;
+  data: {
+    sessionCode: string;
+    totalSent: number;
+    patientVital: {
+      age: number;
+      sex: "M" | "F";
+      triageLevel: number;
+      sbp: number;
+      dbp: number;
+      hr: number;
+      rr: number;
+      spo2: number;
+      temp: number;
+      symptoms: string[];
+    };
+    requests: {
+      requestId: number;
+      hospitalId: number;
+      hospitalName: string;
+      status: string;
+    }[];
+  };
+}
+
+// ✅ 병원 요청 전송 (개선된 버전)
+export const sendHospitalRequest = async (
+  payload: SendHospitalRequestBody
+): Promise<SendHospitalRequestResponse> => {
+  console.log("📤 [sendHospitalRequest] 요청 시작");
+  console.log("📦 Payload:", JSON.stringify(payload, null, 2));
+  
+  // ✅ hospitalIds가 숫자 배열인지 확인
+  const validPayload = {
+    sessionCode: String(payload.sessionCode),
+    hospitalIds: payload.hospitalIds.map(id => Number(id))
+  };
+  
+  console.log("✅ Validated Payload:", JSON.stringify(validPayload, null, 2));
+
+  try {
+    const { data } = await apiClient.post<SendHospitalRequestResponse>(
+      "/api/hospital-requests/send",
+      validPayload
+    );
+    console.log("✅ [sendHospitalRequest] 성공:", data);
+    return data;
+  } catch (error) {
+    console.error("❌ [sendHospitalRequest] 실패:", error);
+    if (axios.isAxiosError(error)) {
+      console.error("응답 데이터:", error.response?.data);
+      console.error("응답 상태:", error.response?.status);
+      console.error("요청 헤더:", error.config?.headers);
+    }
+    throw error;
+  }
 };

@@ -10,7 +10,7 @@ export default function HospitalCardDashboard() {
 
       {/* 병원명 */}
       <h2 className="font-['Pretendard'] font-bold text-[32px] text-[#111827] leading-tight mb-4">
-        충북대학교병원 응급의료센터
+        경기도 의료원 이천병원 응급실
       </h2>
 
       {/* 구분선 */}

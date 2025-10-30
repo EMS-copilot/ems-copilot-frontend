@@ -32,7 +32,7 @@ export default function HospitalCard() {
       {/* 병원명 + 구분선 + 버튼 */}
       <div>
         <h3 className="font-['Pretendard'] font-bold text-2xl text-[#111827] leading-tight">
-          충북대학교병원 응급의료센터
+          경기도 의료원 이천병원 응급실
         </h3>
 
         <div

@@ -9,6 +9,7 @@ interface Step3SymptomsProps {
   onPrev: () => void;
 }
 
+// ✅ 서버가 허용하는 한글 증상 목록
 const SYMPTOMS = [
   { id: "abdominal-pain", label: "복통" },
   { id: "unconscious", label: "의식저하" },
@@ -19,21 +20,24 @@ const SYMPTOMS = [
   { id: "injury", label: "외상" },
   { id: "chest-pain", label: "흉통" },
   { id: "stroke", label: "뇌졸중" },
+  { id: "seizure", label: "경련" },
+  { id: "burn", label: "화상" },
+  { id: "poisoning", label: "중독" },
 ];
-
 
 export default function Step3Symptoms({ onNext, onPrev }: Step3SymptomsProps) {
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const toggleSymptom = (id: string) => {
+  // ✅ 한글 label을 직접 저장
+  const toggleSymptom = (label: string) => {
     setSelectedSymptoms((prev) =>
-      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
+      prev.includes(label) ? prev.filter((s) => s !== label) : [...prev, label]
     );
   };
 
-  const removeSymptom = (id: string) => {
-    setSelectedSymptoms((prev) => prev.filter((s) => s !== id));
+  const removeSymptom = (label: string) => {
+    setSelectedSymptoms((prev) => prev.filter((s) => s !== label));
   };
 
   const filteredSymptoms = SYMPTOMS.filter((symptom) =>
@@ -118,36 +122,33 @@ export default function Step3Symptoms({ onNext, onPrev }: Step3SymptomsProps) {
         {/* 선택된 증상 칩 */}
         {selectedSymptoms.length > 0 && (
           <div className="flex flex-wrap gap-3 mb-6">
-            {selectedSymptoms.map((id) => {
-              const symptom = SYMPTOMS.find((s) => s.id === id);
-              return (
-                <div
-                  key={id}
-                  className="relative flex h-[33px] items-center justify-center bg-[#1778FF] text-white px-6 py-3 rounded-full text-[14px] font-medium"
+            {selectedSymptoms.map((label) => (
+              <div
+                key={label}
+                className="relative flex h-[33px] items-center justify-center bg-[#1778FF] text-white px-6 py-3 rounded-full text-[14px] font-medium"
+              >
+                <span>{label}</span>
+                <button
+                  onClick={() => removeSymptom(label)}
+                  className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-white border-gray-400 flex items-center justify-center hover:opacity-80 transition-opacity"
                 >
-                  <span>{symptom?.label}</span>
-                  <button
-                    onClick={() => removeSymptom(id)}
-                    className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-white border-gray-400 flex items-center justify-center hover:opacity-80 transition-opacity"
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
-                    <svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 16 16"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M12 4L4 12M4 4L12 12"
-                        stroke="#444"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              );
-            })}
+                    <path
+                      d="M12 4L4 12M4 4L12 12"
+                      stroke="#444"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </button>
+              </div>
+            ))}
           </div>
         )}
 
@@ -156,9 +157,9 @@ export default function Step3Symptoms({ onNext, onPrev }: Step3SymptomsProps) {
           {filteredSymptoms.map((symptom) => (
             <button
               key={symptom.id}
-              onClick={() => toggleSymptom(symptom.id)}
+              onClick={() => toggleSymptom(symptom.label)}
               className={`flex flex-col w-[112.33px] h-[88px] items-center justify-center bg-white rounded-2xl p-4 transition-all ${
-                selectedSymptoms.includes(symptom.id)
+                selectedSymptoms.includes(symptom.label)
                   ? "border-2 border-[#1778FF]"
                   : "border border-white hover:border-gray-300"
               }`}
@@ -196,7 +197,12 @@ export default function Step3Symptoms({ onNext, onPrev }: Step3SymptomsProps) {
           이전
         </button>
         <button
-          onClick={() => selectedSymptoms.length > 0 && onNext(selectedSymptoms)}
+          onClick={() => {
+            if (selectedSymptoms.length > 0) {
+              console.log("✅ 선택된 증상 (한글):", selectedSymptoms);
+              onNext(selectedSymptoms);
+            }
+          }}
           disabled={selectedSymptoms.length === 0}
           className={`flex-2 w-[258px] h-11 rounded-full font-semibold text-[14px] transition-all ${
             selectedSymptoms.length > 0
