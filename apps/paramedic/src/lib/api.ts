@@ -258,3 +258,36 @@ export const postPatientMemo = async ({
   );
   return data;
 };
+
+/* -----------------------------------
+ * ✅ 병원 이송 완료 (구급대원)
+ *   PUT /api/encounters/{id}/arrive
+ * ----------------------------------- */
+export interface ArriveResponse {
+  status: string;
+  message: string;
+  data: {
+    id: number;
+    patientCode: string;
+    patientTempId: string;
+    sessionCode: string;
+    hospitalId: number;
+    hospitalName: string;
+    hospitalAddress: string;
+    age: number;
+    sex: string;
+    triageLevel: number;
+    transferLocation: string;
+    transferDistance: number;
+    transferEta: number;
+    status: string;
+    transferredAt: string;
+  };
+}
+
+export const arriveAtHospital = async (encounterId: number): Promise<ArriveResponse> => {
+  const { data } = await apiClient.put<ArriveResponse>(
+    `/api/encounters/${encounterId}/arrive`
+  );
+  return data;
+};

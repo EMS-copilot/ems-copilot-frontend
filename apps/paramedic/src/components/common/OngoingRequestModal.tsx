@@ -55,7 +55,7 @@ export default function OngoingRequestModal({
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.3, ease: "easeOut" }}
-        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[393px] bg-white rounded-t-2xl shadow-[0_-4px_12px_rgba(0,0,0,0.08)] z-60 overflow-hidden"
+        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[393px] bg-white rounded-t-2xl shadow-[0_-4px_12px_rgba(0,0,0,0.08)] z-[60] overflow-hidden"
         role="dialog"
         aria-modal="true"
         aria-label="진행 중 요청"
