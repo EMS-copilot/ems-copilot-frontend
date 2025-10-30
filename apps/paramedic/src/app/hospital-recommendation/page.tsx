@@ -201,7 +201,7 @@ export default function RoutePage() {
                     </button>
                     <button
                       onClick={() => setShowCompletionModal(true)}
-                      className="flex-[2] py-3 rounded-xl bg-gray-900 text-white font-medium text-sm hover:bg-gray-800 transition-colors"
+                      className="flex-2 py-3 rounded-xl bg-gray-900 text-white font-medium text-sm hover:bg-gray-800 transition-colors"
                     >
                       환자 이송 완료
                     </button>
@@ -244,7 +244,7 @@ export default function RoutePage() {
           {showCompletionModal && (
             <>
               <motion.div
-                className="fixed inset-0 bg-black/40 z-[90]"
+                className="fixed inset-0 bg-black/40 z-90"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -256,7 +256,7 @@ export default function RoutePage() {
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.95, opacity: 0, y: 30 }}
                 transition={{ duration: 0.25 }}
-                className="fixed inset-0 flex items-center justify-center z-[100]"
+                className="fixed inset-0 flex items-center justify-center z-100"
               >
                 <div className="w-[320px] bg-white rounded-2xl shadow-lg p-6 text-center">
                   <div className="mb-3">

@@ -8,9 +8,12 @@ module.exports = {
     extend: {
       colors: {
         primary: "#1778FF",
-        background: "#F7F7F7"
-      }
-    }
+        background: "#F7F7F7",
+      },
+      fontFamily: {
+        sans: ["Pretendard", "ui-sans-serif", "system-ui", "Arial"],
+      },
+    },
   },
   plugins: [],
 };

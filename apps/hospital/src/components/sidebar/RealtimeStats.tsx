@@ -1,23 +1,32 @@
-import React from 'react';
-import { Clipboard } from 'lucide-react';
+import Image from "next/image";
 
 export default function RealtimeStats() {
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-      <div className="flex items-center gap-3 mb-6">
-        <Clipboard className="w-6 h-6 text-blue-500" />
-        <h2 className="text-lg font-bold text-gray-900">실시간 현황</h2>
+    <div className="w-[514px] h-[168px] bg-white rounded-[20px] p-6 font-['Pretendard']">
+      {/* 헤더 */}
+      <div className="flex items-center gap-2 mb-6">
+        <Image src="/Waiting.png" alt="실시간 현황" width={20} height={20} />
+        <h2 className="text-lg font-semibold text-gray-900">실시간 현황</h2>
       </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div className="text-center p-4 bg-blue-50 rounded-lg">
-          <p className="text-sm text-gray-600 mb-2">수용 건 수</p>
-          <p className="text-4xl font-bold text-blue-600">24건</p>
+
+      {/* 통계 구역 */}
+      <div className="flex items-center justify-between">
+        {/* 수용 건 수 */}
+        <div className="w-[217px] h-[76px] flex flex-col items-center justify-center bg-gray-100 rounded-lg">
+          <p className="text-sm font-medium text-gray-700 mt-1">수용 건 수</p>
+          <p className="text-[28px] font-semibold text-[#1778FF]">24건</p>
         </div>
-        <div className="text-center p-4 bg-red-50 rounded-lg">
-          <p className="text-sm text-gray-600 mb-2">대기 건 수</p>
-          <p className="text-4xl font-bold text-red-600">8분</p>
+
+        {/* 구분선 */}
+        <div className="h-[76px] w-[1px] bg-gray-200"></div>
+
+        {/* 거절 건 수 */}
+        <div className="w-[217px] h-[76px] flex flex-col items-center justify-center bg-gray-100 rounded-lg">
+          <p className="text-sm font-medium text-gray-700 mt-1">거절 건 수</p>
+          <p className="text-[28px] font-semibold text-[#FF4545]">8건</p>
         </div>
       </div>
     </div>
   );
 }
+

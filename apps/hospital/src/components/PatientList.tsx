@@ -1,26 +1,14 @@
+'use client';
+
 import React from 'react';
-import { Clipboard } from 'lucide-react';
+import Image from 'next/image';
 import PatientCard from './patient/PatientCard';
 
-interface Patient {
-  id: string;
-  status: 'emergency' | 'urgent';
-  tags: string[];
-  vitals: {
-    sbp: string;
-    dbp: string;
-    hr: string;
-    rr: string;
-    spo2: string;
-    temp: string;
-  };
-}
-
 export default function PatientList() {
-  const patients: Patient[] = [
+  const patients = [
     {
       id: 'P2024-001',
-      status: 'urgent',
+      status: 'urgent' as const,
       tags: ['위급', '외상', '출혈', '화상'],
       vitals: {
         sbp: '121mmHg',
@@ -28,25 +16,12 @@ export default function PatientList() {
         hr: '76bpm',
         rr: '17/min',
         spo2: '94%',
-        temp: '36.4°C'
-      }
-    },
-    {
-      id: 'P2024-001',
-      status: 'urgent',
-      tags: ['위급', '외상', '출혈', '화상'],
-      vitals: {
-        sbp: '121mmHg',
-        dbp: '81mmHg',
-        hr: '76bpm',
-        rr: '17/min',
-        spo2: '94%',
-        temp: '36.4°C'
-      }
+        temp: '36.4°C',
+      },
     },
     {
       id: 'P2024-002',
-      status: 'emergency',
+      status: 'emergency' as const,
       tags: ['안정', '경미한 외상', '통증', '골절'],
       vitals: {
         sbp: '130mmHg',
@@ -54,35 +29,48 @@ export default function PatientList() {
         hr: '80bpm',
         rr: '18/min',
         spo2: '96%',
-        temp: '36.8°C'
-      }
+        temp: '36.8°C',
+      },
     },
     {
-      id: 'P2024-002',
-      status: 'emergency',
-      tags: ['안정', '경미한 외상', '통증', '골절'],
+      id: 'P2024-003',
+      status: 'urgent' as const,
+      tags: ['저혈압', '두통'],
       vitals: {
-        sbp: '130mmHg',
-        dbp: '85mmHg',
-        hr: '80bpm',
-        rr: '18/min',
-        spo2: '96%',
-        temp: '36.8°C'
-      }
-    }
+        sbp: '98mmHg',
+        dbp: '60mmHg',
+        hr: '88bpm',
+        rr: '20/min',
+        spo2: '95%',
+        temp: '36.2°C',
+      },
+    },
+    {
+      id: 'P2024-004',
+      status: 'urgent' as const,
+      tags: ['발열', '피로감', '기침'],
+      vitals: {
+        sbp: '110mmHg',
+        dbp: '70mmHg',
+        hr: '85bpm',
+        rr: '19/min',
+        spo2: '97%',
+        temp: '37.1°C',
+      },
+    },
   ];
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <Clipboard className="w-6 h-6 text-blue-500" />
-          <h3 className="text-xl font-bold text-gray-900">요청받은 환자 목록</h3>
-        </div>
-        <span className="text-gray-500 text-sm">총 24건</span>
+    <div className="w-full h-full min-h-0 bg-white rounded-[20px] shadow-sm border border-gray-100 p-6 font-['Pretendard'] flex flex-col">
+      {/* 헤더 (고정 영역) */}
+      <div className="flex items-center gap-2 mb-6 flex-shrink-0">
+        <Image src="/Waiting.png" alt="요청받은 환자 목록" width={20} height={20} />
+        <h2 className="text-lg font-semibold text-gray-900">요청받은 환자 목록</h2>
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      {/* 카드 리스트 (스크롤 영역) */}
+      <div className="grid grid-cols-2 gap-6 flex-1 min-h-0 h-full overflow-y-auto pr-1
+                      scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
         {patients.map((patient, index) => (
           <PatientCard key={index} patient={patient} />
         ))}

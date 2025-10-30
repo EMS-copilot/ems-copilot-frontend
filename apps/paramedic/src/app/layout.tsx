@@ -18,7 +18,7 @@ export default function RootLayout({
           className="
             relative
             w-full max-w-[393px]
-            min-h-[100dvh]
+            min-h-dvh
             bg-[#F7F7F7]
             overflow-y-auto
           "
