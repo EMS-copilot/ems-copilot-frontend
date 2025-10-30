@@ -47,7 +47,7 @@ export default function AddPatientPage() {
   const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
 
   /* ------------------------------------
-   * ✅ 환자 등록 + 추천 병원 조회 (fallback 포함)
+   * ✅ 환자 등록 + 추천 병원 조회 (증상은 이미 한글)
    * ------------------------------------ */
   const handleSubmit = async (vitalsArg?: VitalsPayload) => {
     if (!isMounted) return;
@@ -76,7 +76,7 @@ export default function AddPatientPage() {
       rr: usedVitals.rr,
       spo2: usedVitals.spo2,
       temp: usedVitals.temp,
-      symptoms,
+      symptoms, // ✅ 이미 한글로 저장됨
     };
 
     console.log("📦 [전송할 데이터]:", payload);
@@ -85,12 +85,27 @@ export default function AddPatientPage() {
       // 1️⃣ 환자 등록 요청
       const response = await api.registerPatient(payload);
       console.log("✅ 환자 등록 성공:", response);
-      const recommended = response.data?.recommendedHospitals ?? [];
+
+      // ✅ 세션 코드 localStorage에 저장
+      const sessionCode =
+        response?.data?.data?.sessionCode || response?.data?.sessionCode;
+      if (sessionCode && typeof window !== "undefined") {
+        localStorage.setItem("currentSessionCode", sessionCode);
+        console.log("💾 세션 코드 저장 완료:", sessionCode);
+      } else {
+        console.warn("⚠️ 세션 코드가 응답에 포함되어 있지 않습니다.");
+      }
+
+      // 2️⃣ 추천 병원 목록
+      const recommended =
+        response.data?.data?.recommendedHospitals ??
+        response.data?.recommendedHospitals ??
+        [];
 
       console.log("📍 추천 병원 개수:", recommended.length);
       console.table(recommended ?? []);
 
-      // 2️⃣ 추천 병원이 없을 경우 fallback으로 거리 기반 병원 조회
+      // 3️⃣ 추천 병원이 없을 경우 fallback으로 거리 기반 병원 조회
       if (recommended.length === 0) {
         console.warn("⚠️ 추천 병원 없음 → 거리 기반 병원 조회로 대체");
 
@@ -117,7 +132,7 @@ export default function AddPatientPage() {
         }
       }
 
-      // 3️⃣ 추천 병원이 있을 경우 그대로 반환
+      // 4️⃣ 추천 병원이 있을 경우 그대로 반환
       return recommended;
     } catch (error: any) {
       console.error("❌ 등록 실패:", error.response?.data || error.message);
@@ -191,6 +206,7 @@ export default function AddPatientPage() {
         {step === 3 && (
           <Step3Symptoms
             onNext={(selected) => {
+              console.log("📝 선택된 증상:", selected);
               setSymptoms(selected);
               nextStep();
             }}
