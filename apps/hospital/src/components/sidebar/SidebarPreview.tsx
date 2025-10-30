@@ -14,44 +14,42 @@ declare global {
 
 export default function SidebarPreview() {
   const mapRef = useRef<HTMLDivElement>(null);
-  const isLoaded = useKakaoMap(); // ✅ SDK 로드 확인
+  const isLoaded = useKakaoMap();
   const [eta, setEta] = useState<number | null>(null);
   const [distance, setDistance] = useState<number | null>(null);
 
   useEffect(() => {
-    if (!isLoaded || !mapRef.current) return;
-    if (typeof window === "undefined" || !window.kakao?.maps) return;
-
+    if (!isLoaded || typeof window === "undefined") return;
     const { kakao } = window;
+    if (!mapRef.current) return;
 
-    // ✅ 출발/도착 좌표
-    const origin = { lat: 36.9935, lng: 127.5928 }; // 한울요양원
-    const destination = { lat: 37.2797, lng: 127.4519 }; // 경기도의료원이천병원
+    kakao.maps.load(async () => {
+      const origin = { lat: 36.9935, lng: 127.5928 }; // 한울요양원
+      const destination = { lat: 37.2797, lng: 127.4519 }; // 경기도의료원이천병원
 
-    // ✅ 지도 생성
-    const map = new kakao.maps.Map(mapRef.current, {
-      center: new kakao.maps.LatLng(origin.lat, origin.lng),
-      level: 9,
-    });
+      // ✅ 지도 생성
+      const map = new kakao.maps.Map(mapRef.current, {
+        center: new kakao.maps.LatLng(origin.lat, origin.lng),
+        level: 9,
+      });
 
-    // ✅ 마커 표시
-    new kakao.maps.Marker({
-      position: new kakao.maps.LatLng(origin.lat, origin.lng),
-      map,
-    });
-    new kakao.maps.Marker({
-      position: new kakao.maps.LatLng(destination.lat, destination.lng),
-      map,
-    });
+      // ✅ 마커 표시
+      new kakao.maps.Marker({
+        position: new kakao.maps.LatLng(origin.lat, origin.lng),
+        map,
+      });
+      new kakao.maps.Marker({
+        position: new kakao.maps.LatLng(destination.lat, destination.lng),
+        map,
+      });
 
-    // ✅ 경로 API 호출
-    const fetchRoute = async () => {
+      // ✅ Directions API 호출
       try {
         const res = await fetch(
           `https://apis-navi.kakaomobility.com/v1/directions?origin=${origin.lng},${origin.lat}&destination=${destination.lng},${destination.lat}&priority=RECOMMEND`,
           {
             headers: {
-              Authorization: `KakaoAK ${process.env.NEXT_PUBLIC_KAKAO_REST_KEY}`, // ✅ REST 키
+              Authorization: `KakaoAK ${process.env.NEXT_PUBLIC_KAKAO_REST_KEY}`,
               "Content-Type": "application/json",
             },
           }
@@ -97,9 +95,7 @@ export default function SidebarPreview() {
       } catch (err) {
         console.error("❌ 경로 API 호출 실패:", err);
       }
-    };
-
-    fetchRoute();
+    });
   }, [isLoaded]);
 
   return (
@@ -111,15 +107,8 @@ export default function SidebarPreview() {
         {/* 헤더 */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Image
-              src="/Waiting.png"
-              alt="병원 수용 능력"
-              width={20}
-              height={20}
-            />
-            <h2 className="text-lg font-semibold text-gray-900">
-              실시간 현황 지도
-            </h2>
+            <Image src="/Waiting.png" alt="병원 수용 능력" width={20} height={20} />
+            <h2 className="text-lg font-semibold text-gray-900">실시간 현황 지도</h2>
           </div>
 
           {/* 범례 */}
@@ -141,10 +130,7 @@ export default function SidebarPreview() {
 
         {/* 지도 */}
         <div className="relative w-full h-[495px] rounded-xl overflow-hidden">
-          <div
-            ref={mapRef}
-            className="absolute inset-0 mx-1 rounded-lg overflow-hidden"
-          />
+          <div ref={mapRef} className="absolute inset-0 mx-1 rounded-lg overflow-hidden" />
 
           {/* 예상 도착 시간 오버레이 */}
           <div className="absolute bottom-5 left-1/2 -translate-x-1/2 w-[85%] bg-white/95 backdrop-blur-sm border border-gray-200 rounded-2xl shadow-md px-6 py-3 flex items-start justify-between z-[10]">
