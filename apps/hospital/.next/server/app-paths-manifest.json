@@ -1,5 +1,7 @@
 {
+  "/hospital/edit/page": "app/hospital/edit/page.js",
+  "/login/page": "app/login/page.js",
   "/hospital/info/page": "app/hospital/info/page.js",
   "/page": "app/page.js",
-  "/hospital/edit/page": "app/hospital/edit/page.js"
+  "/hospital/preview/page": "app/hospital/preview/page.js"
 }

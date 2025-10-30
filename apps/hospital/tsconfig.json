@@ -1,32 +1,40 @@
 {
-    "extends": "../../tsconfig.json",
-    "compilerOptions": {
-      "target": "ES2022",
-      "module": "esnext",
-      "moduleResolution": "bundler",
-      "jsx": "preserve",
-      "strict": true,
-      "esModuleInterop": true,
-      "allowJs": true,
-      "baseUrl": "src",
-      "paths": {
-        "@/*": ["*"]
-      },
-      "outDir": "dist",
-      "lib": ["dom", "dom.iterable", "esnext"],
-      "skipLibCheck": true,
-      "noEmit": true,
-      "incremental": true,
-      "resolveJsonModule": true,
-      "isolatedModules": true,
-      "plugins": [{ "name": "next" }],
-      "typeRoots": ["./node_modules/@types", "./src/types"],
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "jsx": "preserve",
+    "strict": true,
+    "esModuleInterop": true,
+    "allowJs": true,
+
+    /* ✅ 경로 alias (루트는 src 기준) */
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["*"]
     },
-    "include": [
-      "src",
-      "../../node_modules/next/types/**/*.ts",
-      ".next/types/**/*.ts"
-    ],
-    "exclude": ["node_modules"]
-  }
-  
+
+    "outDir": "dist",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "skipLibCheck": true,
+    "noEmit": true,
+    "incremental": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "plugins": [{ "name": "next" }],
+
+    /* ✅ 타입 루트: hospital 자체 + 전역 */
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/types"
+    ]
+  },
+  "include": [
+    "next-env.d.ts",
+    "src/**/*",
+    "src/types/**/*.d.ts",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}
