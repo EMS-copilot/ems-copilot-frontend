@@ -17,20 +17,17 @@ interface Hospital {
   badgeText: string;
 }
 
-interface OngoingRequestModalProps {
+export interface OngoingRequestModalProps {
   hospitals: Hospital[];
-  onHideModal?: () => void;
+  onClose?: () => void; // 있지만 지금은 비활성화 (닫히지 않게)
 }
 
 export default function OngoingRequestModal({
   hospitals,
 }: OngoingRequestModalProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [notificationCount, setNotificationCount] = useState(0);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(
-    null
-  );
+  const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const scrollLeft = e.currentTarget.scrollLeft;
@@ -50,12 +47,18 @@ export default function OngoingRequestModal({
 
   return (
     <>
-      {/* OngoingRequestModal 본체 */}
+      {/* ✅ 오버레이 제거 — 이제 클릭해도 닫히지 않음 */}
+      {/* (이전엔 <div className="fixed inset-0 z-[59]" onClick={onClose}/> 였음) */}
+
+      {/* 본체 */}
       <motion.div
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
         className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[393px] bg-white rounded-t-2xl shadow-[0_-4px_12px_rgba(0,0,0,0.08)] z-60 overflow-hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-label="진행 중 요청"
       >
         {/* 헤더 */}
         <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-gray-100">
@@ -77,28 +80,17 @@ export default function OngoingRequestModal({
             </span>
           </div>
 
-          {/* 오른쪽: 알림 버튼 */}
-          <button
-            onClick={() => setNotificationCount((prev) => (prev === 0 ? 3 : 0))} // 테스트용
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all ${
-              notificationCount > 0
-                ? "bg-[#1778FF] text-white"
-                : "bg-gray-100 text-gray-500"
-            }`}
-          >
-            <Image
-              src="/bell-ringing.png"
-              alt="알림"
-              width={20}
-              height={20}
-              className={`object-contain transition-all ${
-                notificationCount > 0
-                  ? "" // 파란 배경일 때는 원래 흰색 유지
-                  : "invert brightness-0" // 회색 배경일 때 어둡게 변환
-              }`}
-            />
-            <span className="text-[14px] font-medium">{notificationCount}</span>
-          </button>
+          {/* 오른쪽: 닫기 버튼 제거 (고정 상태로 유지) */}
+          <div className="flex items-center gap-2">
+            <button
+              disabled
+              className="w-8 h-8 grid place-items-center rounded-full opacity-40 cursor-not-allowed"
+              aria-label="닫기 비활성화"
+              type="button"
+            >
+              <span className="text-xl leading-none text-gray-300">×</span>
+            </button>
+          </div>
         </div>
 
         {/* 병원 카드 리스트 */}
@@ -135,9 +127,7 @@ export default function OngoingRequestModal({
               {/* 거리/시간 정보 */}
               <div className="grid grid-cols-3 text-center divide-x divide-gray-200">
                 <div>
-                  <p className="text-[12px] font-light text-gray-500">
-                    총 거리
-                  </p>
+                  <p className="text-[12px] font-light text-gray-500">총 거리</p>
                   <p className="text-[16px] font-semibold text-black">
                     {hospital.distance || "3.4km"}
                   </p>

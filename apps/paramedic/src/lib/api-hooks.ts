@@ -1,3 +1,4 @@
+// src/api/api-hook.ts
 "use client";
 
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -22,12 +23,12 @@ export const useLogin = () => {
   });
 };
 
-// ✅ 이름 조회: enabled로 호출 제어
+// ✅ 이름 조회
 export const useMyName = (enabled: boolean = true) => {
   return useQuery({
     queryKey: ["myName"],
     queryFn: api.getMyName,
-    enabled,                 // ← variant==="home"일 때만 true로
+    enabled,
     staleTime: 1000 * 60 * 5,
     retry: false,
   });
@@ -59,5 +60,30 @@ export const useSendHospitalRequest = () => {
     api.SendHospitalRequestBody
   >({
     mutationFn: api.sendHospitalRequest,
+  });
+};
+
+/* -----------------------------------
+ * ✅ STT 업로드 훅
+ *  - mutateAsync(audioBlob) → { status, data: { transcript, ... } }
+ * ----------------------------------- */
+export const useSpeechTranscribe = () => {
+  return useMutation({
+    mutationFn: (audioFile: Blob) =>
+      api.postSpeechTranscribe(audioFile, {
+        languageCode: "ko-KR",
+        sampleRateHz: 48000,
+        encoding: "OGG",
+      }),
+  });
+};
+
+/* -----------------------------------
+ * ✅ 메모 저장 훅
+ * ----------------------------------- */
+export const useSavePatientMemo = () => {
+  return useMutation({
+    mutationFn: (params: { sessionCode: string; memo: string }) =>
+      api.postPatientMemo(params),
   });
 };

@@ -42,7 +42,7 @@ export default function HospitalConfirmModal({
     localStorage.setItem("selectedHospital", JSON.stringify(hospital));
     
     // route 페이지로 이동
-    router.push("/hospital-recommendation/route");
+    router.push("/hospital-recommendation");
   };
 
   // 기본값 설정
