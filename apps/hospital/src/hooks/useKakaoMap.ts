@@ -20,25 +20,20 @@ export default function useKakaoMap() {
       return;
     }
 
-    // 이미 로드됨
+    // 이미 로드된 경우
     if (window.kakao?.maps) {
       setIsLoaded(true);
       return;
     }
 
-    // 기존 스크립트 체크
     const existing = document.getElementById("kakao-map-sdk");
     if (existing) {
       existing.addEventListener("load", () => {
-        window.kakao.maps.load(() => {
-          console.log("✅ Kakao Map SDK loaded (existing script)");
-          setIsLoaded(true);
-        });
+        window.kakao.maps.load(() => setIsLoaded(true));
       });
       return;
     }
 
-    // 새 스크립트 로드
     const script = document.createElement("script");
     script.id = "kakao-map-sdk";
     script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoKey}&autoload=false`;
@@ -51,7 +46,7 @@ export default function useKakaoMap() {
       });
     };
 
-    script.onerror = () => console.error("❌ Kakao Map SDK failed to load");
+    script.onerror = () => console.error("❌ Failed to load Kakao Map SDK.");
 
     document.head.appendChild(script);
   }, []);
