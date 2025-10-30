@@ -18,8 +18,8 @@ export default function PatientCardDetail() {
           <Image
             src="/back-arrow.png"
             alt="뒤로가기"
-            width={20}
-            height={20}
+            width={10}
+            height={10}
           />
         </button>
         <h1 className="text-[20px] font-semibold text-gray-900 leading-[28px] tracking-[-0.02em]">
@@ -28,7 +28,7 @@ export default function PatientCardDetail() {
       </div>
 
       {/* 2️⃣ 고위험 · 응급 뱃지 */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-3">
         <span className="px-5 py-2 text-[15px] font-semibold rounded-full bg-[#FB4D40] text-[#FEE4E2]">
           고위험
         </span>
@@ -38,30 +38,28 @@ export default function PatientCardDetail() {
       </div>
 
       {/* 3️⃣ 환자 ID */}
-      <h2 className="text-[36px] font-bold text-gray-900 mb-10 leading-tight">
-        P2024-001
+      <h2 className="text-[36px] font-bold text-gray-900 mb-6 leading-tight">
+        P2025-12345
       </h2>
 
       {/* 4️⃣ 환자 중증도 / 주요 증상 / 초기 활력징후 */}
-      <div className="flex items-start justify-between gap-6 mb-10">
+      <div className="flex items-start justify-between gap-1 mb-8">
         {/* 환자 중증도 */}
-        <div className="flex flex-col items-start w-[180px]">
+        <div className="flex flex-col items-start w-[160px]">
           <p className="text-[#A3A3A3] text-[13px] mb-2">환자 중증도</p>
-          <div className="bg-[#F9FAFB] rounded-[12px] px-5 py-4">
-            <span className="bg-[#FDEAEA] text-[#D0312D] text-[15px] font-medium px-4 py-1.5 rounded-full">
-              위급
-            </span>
-          </div>
+          <span className="bg-[#FDEAEA] text-[#D0312D] text-[15px] font-medium px-4 py-1.5 rounded-full">
+            위급
+          </span>
         </div>
 
         {/* 주요 증상 */}
         <div className="flex flex-col items-start flex-1">
           <p className="text-[#A3A3A3] text-[13px] mb-2">주요 증상</p>
-          <div className="bg-[#F9FAFB] rounded-[12px] px-6 py-4 flex gap-2 flex-wrap">
+          <div className="flex flex-wrap gap-1.5">
             {["외상", "출혈", "화상"].map((sym, idx) => (
               <span
                 key={idx}
-                className="bg-[#EEF5FF] text-[#1778FF] text-[15px] font-medium px-4 py-1.5 rounded-full"
+                className="bg-[#EEF5FF] text-[#1778FF] text-[15px] font-medium px-3.5 py-1.5 rounded-full"
               >
                 {sym}
               </span>
@@ -70,16 +68,16 @@ export default function PatientCardDetail() {
         </div>
 
         {/* 초기 활력징후 */}
-        <div className="flex flex-col items-start flex-[1.2]">
+        <div className="flex flex-col items-start flex-[5]">
           <p className="text-[#A3A3A3] text-[13px] mb-2">초기 활력징후</p>
-          <div className="bg-[#F9FAFB] rounded-[12px] px-6 py-4 flex gap-6">
+          <div className="bg-[#F9FAFB] rounded-[12px] px-20 py-4 flex items-center gap-20">
             {[
-              { label: "SBP", value: "121mmHg" },
-              { label: "DBP", value: "81mmHg" },
-              { label: "HR", value: "76bpm" },
-              { label: "RR", value: "17min" },
-              { label: "SpO₂", value: "94%" },
-              { label: "Temp", value: "36.4°C" },
+              { label: "SBP", value: "120mmHg" },
+              { label: "DBP", value: "78mmHg" },
+              { label: "HR", value: "90bpm" },
+              { label: "RR", value: "20min" },
+              { label: "SpO₂", value: "96%" },
+              { label: "Temp", value: "36.8°C" },
             ].map((v, idx) => (
               <div key={idx} className="flex flex-col items-center relative">
                 <p className="text-[12px] text-[#A3A3A3] mb-1">{v.label}</p>
@@ -87,7 +85,7 @@ export default function PatientCardDetail() {
                   {v.value}
                 </p>
                 {idx < 5 && (
-                  <div className="absolute right-[-12px] top-0 bottom-0 w-[1px] bg-[#E5E5E5]" />
+                  <div className="absolute right-[-40px] top-0 bottom-0 w-[1px] bg-[#E5E5E5]" />
                 )}
               </div>
             ))}
@@ -95,12 +93,13 @@ export default function PatientCardDetail() {
         </div>
       </div>
 
+
+
       {/* 5️⃣ 메모 */}
       <div className="mt-8">
         <p className="text-[#A3A3A3] text-[13px] mb-3">메모</p>
         <div className="bg-white border border-gray-200 rounded-[12px] p-5 min-h-[100px] text-[15px] leading-relaxed text-gray-800">
-          환자 상태 업데이트. 환자 상태 업데이트. 환자 상태 업데이트. 환자 상태
-          업데이트. 환자 상태 업데이트. 환자 상태 업데이트.
+        여기는 119 구급대 P12345678입니다. 흉통 환자 1명 인계드립니다. 남 55세, 트리아지 3, 발현 13시 55분, 한울요양원 발생. 의식 명료(A/O×3), 호흡곤란 호소는 없습니다. 12유도 심전도 촬영했고 동율동, ST 상승은 보이지 않습니다. 이미지 전송 예정입니다. 처치는 정맥로 확보 후 KVO 유지, 아스피린 300mg 경구 투여, 통증 NRS 7→5로 감소했습니다. 과거력 고혈압, 복용약 암로디핀, 약물 알레르기 없음, 최근 48시간 내 PDE5 복용 부인 확인했습니다. 목적지 이천병원 응급실, ETA 48분으로 도착 14:50 예상합니다. 도착 전 흉통/ACS 평가 세트, 채혈 준비(심근효소·CBC·전해질·Cr), 12유도 EKG 수신, CXR 준비 부탁드립니다. 감사합니다.
         </div>
       </div>
     </div>

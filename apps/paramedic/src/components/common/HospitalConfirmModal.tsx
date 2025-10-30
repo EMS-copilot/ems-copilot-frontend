@@ -66,7 +66,7 @@ export default function HospitalConfirmModal({
   return (
     <>
       {/* 배경 오버레이 */}
-      <div className="fixed inset-0 bg-black/40 z-[85]" onClick={onClose} />
+      <div className="fixed inset-0 bg-black/40 z-85" onClick={onClose} />
 
       {/* 모달 */}
       <motion.div
@@ -74,7 +74,7 @@ export default function HospitalConfirmModal({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ duration: 0.2 }}
-        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] max-w-[360px] h-[416px] bg-white rounded-2xl z-[90] overflow-hidden"
+        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] max-w-[360px] h-[416px] bg-white rounded-2xl z-90 overflow-hidden"
       >
         <div className="px-4 pt-4 pb-4">
           {/* 제목 */}
@@ -96,7 +96,7 @@ export default function HospitalConfirmModal({
                   </span>
                 </div>
                 <span
-                  className={`px-3 py-1 rounded-full text-[13px] font-medium flex-shrink-0 ${
+                  className={`px-3 py-1 rounded-full text-[13px] font-medium shrink-0 ${
                     hospital.badgeColor === "green"
                       ? "bg-[#E8F5E9] text-[#27A959]"
                       : "bg-[#F3E5F5] text-[#9C27B0]"
@@ -220,13 +220,13 @@ export default function HospitalConfirmModal({
           <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="w-[85px] h-[40px] rounded-2xl border border-gray-300 text-gray-600 font-medium text-[14px] hover:bg-gray-50 transition-all"
+              className="w-[85px] h-10 rounded-2xl border border-gray-300 text-gray-600 font-medium text-[14px] hover:bg-gray-50 transition-all"
             >
               이전
             </button>
             <button
               onClick={handleShowHandover}
-              className="w-[228px] h-[40px] rounded-2xl bg-gray-900 text-white font-medium text-[14px] hover:bg-gray-800 transition-all"
+              className="w-[228px] h-10 rounded-2xl bg-gray-900 text-white font-medium text-[14px] hover:bg-gray-800 transition-all"
             >
               인수인계 내용 확인하기
             </button>

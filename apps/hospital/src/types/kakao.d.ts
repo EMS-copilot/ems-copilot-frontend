@@ -1,8 +1,8 @@
-// src/types/kakao.d.ts
+// apps/hospital/types/kakao.d.ts
 declare global {
-    interface Window {
-      kakao: any;
-    }
+  interface Window {
+    kakao: any;
   }
-  
-  export {};  
+}
+
+export {};
