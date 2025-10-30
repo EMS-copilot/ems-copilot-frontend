@@ -55,7 +55,7 @@ export default function OngoingRequestModal({
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[393px] bg-white rounded-t-2xl shadow-[0_-4px_12px_rgba(0,0,0,0.08)] z-[60] overflow-hidden"
+        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[393px] bg-white rounded-t-2xl shadow-[0_-4px_12px_rgba(0,0,0,0.08)] z-60 overflow-hidden"
       >
         {/* 헤더 */}
         <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-gray-100">
@@ -110,7 +110,7 @@ export default function OngoingRequestModal({
             <div
               key={idx}
               onClick={() => handleCardClick(hospital)}
-              className="flex-shrink-0 snap-center bg-white border border-gray-200 rounded-2xl px-4 pt-4 pb-3 w-[280px] cursor-pointer hover:border-gray-300 transition-colors"
+              className="shrink-0 snap-center bg-white border border-gray-200 rounded-2xl px-4 pt-4 pb-3 w-[280px] cursor-pointer hover:border-gray-300 transition-colors"
             >
               {/* 병원 이름 + 위치 + 상태 */}
               <div className="flex items-center justify-between mb-3">
@@ -168,7 +168,7 @@ export default function OngoingRequestModal({
           {hospitals.map((_, idx) => (
             <div
               key={idx}
-              className={`w-[6px] h-[6px] rounded-full transition-colors ${
+              className={`w-1.5 h-1.5 rounded-full transition-colors ${
                 currentIndex === idx ? "bg-black" : "bg-gray-300"
               }`}
             />
