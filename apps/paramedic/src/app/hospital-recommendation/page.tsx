@@ -22,7 +22,6 @@ export default function RoutePage() {
   );
   const [showPatientDetails, setShowPatientDetails] = useState(false);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
-  const [hospital, setHospital] = useState<any>(null);
 
   // ETA/거리
   const [eta, setEta] = useState<number | null>(null);
@@ -40,46 +39,35 @@ export default function RoutePage() {
   const { mutateAsync: saveMemo } = useSavePatientMemo();
   const { mutateAsync: arriveAtHospital } = useArriveAtHospital();
 
-  useEffect(() => {
-    const savedHospital = localStorage.getItem("selectedHospital");
-    if (savedHospital) setHospital(JSON.parse(savedHospital));
-  }, []);
-
-  const patientData = {
-    bloodPressureSystolic: "121mmHg",
-    bloodPressureDiastolic: "81mmHg",
-    heartRate: "76bpm",
-    respiratoryRate: "17min",
-    spo2: "94%",
-    temperature: "36.4°C",
-  };
-
   /* --------------------------------------
    * 지도 + 경로 (Kakao Mobility Directions)
    * -------------------------------------- */
   useEffect(() => {
-    if (!isMapLoaded || !mapRef.current || !hospital) return;
+    if (!isMapLoaded || !mapRef.current) return;
     const { kakao } = window as any;
 
     kakao.maps.load(async () => {
-      const origin = { lat: 37.4979, lng: 127.0276 };
-      const destination = {
-        lat: hospital.lat ?? 37.498095,
-        lng: hospital.lng ?? 127.02761,
-      };
+      // ✅ 출발지 / 도착지 고정
+      const origin = { lat: 36.993245, lng: 127.595424 }; // 한울요양원
+      const destination = { lat: 37.272715, lng: 127.434897 }; // 경기도의료원이천병원
 
       const map = new kakao.maps.Map(mapRef.current, {
         center: new kakao.maps.LatLng(origin.lat, origin.lng),
         level: 7,
       });
 
+      // 🔹 출발지 마커
       new kakao.maps.Marker({
         position: new kakao.maps.LatLng(origin.lat, origin.lng),
         map,
+        title: "출발지 (한울요양원)",
       });
+
+      // 🔹 도착지 마커
       new kakao.maps.Marker({
         position: new kakao.maps.LatLng(destination.lat, destination.lng),
         map,
+        title: "도착지 (경기도의료원이천병원)",
       });
 
       try {
@@ -133,7 +121,7 @@ export default function RoutePage() {
         console.error("❌ 경로 API 호출 실패:", err);
       }
     });
-  }, [isMapLoaded, hospital]);
+  }, [isMapLoaded]);
 
   /* --------------------------------------
    * 🎙️ 음성 녹음 + STT + 메모 저장
@@ -248,22 +236,6 @@ export default function RoutePage() {
     }
   };
 
-  if (!hospital) {
-    return (
-      <div className="w-full max-w-[393px] mx-auto bg-white min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600 mb-4">병원 정보를 불러오는 중...</p>
-          <button
-            onClick={() => router.back()}
-            className="px-4 py-2 bg-gray-900 text-white rounded-lg"
-          >
-            뒤로 가기
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="w-full max-w-[393px] mx-auto bg-white min-h-screen relative overflow-hidden">
       {/* 헤더 */}
@@ -276,7 +248,7 @@ export default function RoutePage() {
         <div ref={mapRef} className="w-full h-full" />
       </div>
 
-      {/* 하단 UI 전체 (항상 유지) */}
+      {/* 하단 UI */}
       <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[393px] z-40">
         <motion.div
           key="route-info"
@@ -321,7 +293,6 @@ export default function RoutePage() {
             </button>
           </div>
 
-          {/* ✅ 이송 완료 버튼 수정 */}
           <motion.div className="px-6 mt-3 mb-[66px]">
             <div className="bg-white rounded-2xl shadow-lg p-4 border border-blue-400">
               <div className="flex items-center justify-between mb-3">
@@ -355,7 +326,7 @@ export default function RoutePage() {
           </motion.div>
         </motion.div>
 
-        {/* 기존 모달 그대로 유지 */}
+        {/* 완료 모달 */}
         <AnimatePresence>
           {showCompletionModal && (
             <>
