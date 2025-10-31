@@ -87,3 +87,10 @@ export const useSavePatientMemo = () => {
       api.postPatientMemo(params),
   });
 };
+
+// ✅ 병원 이송 완료 훅
+export const useArriveAtHospital = () => {
+  return useMutation<api.ArriveResponse, Error, number>({
+    mutationFn: (encounterId) => api.arriveAtHospital(encounterId),
+  });
+};

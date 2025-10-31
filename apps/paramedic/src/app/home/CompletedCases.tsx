@@ -3,20 +3,20 @@
 export default function CompletedCases() {
   const completedCases = [
     {
-      id: "P2024-001",
+      id: "P2025-002",
       type: "위급",
       symptom: "흉통",
-      time: "14시 32분",
-      address: "강남구 테헤란로 427",
-      hospital: "충북대학교 병원",
+      time: "8시 34분",
+      address: "충청북도 음성군 생극면 일생로 518",
+      hospital: "음성소망병원",
       status: "이송 완료",
     },
     {
-      id: "P2024-002",
+      id: "P2025-003",
       type: "위급",
       symptom: "흉통",
-      time: "14시 32분",
-      address: "강남구 테헤란로 427",
+      time: "11시 22분",
+      address: "충청북도 청주시 서원구 1순환로 776",
       hospital: "충북대학교 병원",
       status: "이송 완료",
     },

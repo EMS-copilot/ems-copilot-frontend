@@ -57,14 +57,13 @@ export default function HospitalRecommendationModal({
   const [selectedCount, setSelectedCount] = useState(0);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isDeclineOpen, setIsDeclineOpen] = useState(false);
-  const [declinedOnce, setDeclinedOnce] = useState(false); // ✅ 첫 요청 여부 추적
+  const [declinedOnce, setDeclinedOnce] = useState(false);
   const [selectedHospitalsForConfirm, setSelectedHospitalsForConfirm] = useState<
     { id: string; name: string; badgeColor: "green" | "purple"; badgeText: string }[]
   >([]);
 
   const sendRequestMutation = useSendHospitalRequest();
 
-  // ✅ 세션 스토리지 상태 불러오기 (hydration 이후)
   useEffect(() => {
     if (typeof window !== "undefined") {
       const flag = sessionStorage.getItem("ems:demoDeclinedOnce");
@@ -72,7 +71,6 @@ export default function HospitalRecommendationModal({
     }
   }, []);
 
-  // ✅ AI 추천 → 카드 변환
   const hospitals = useMemo<HospitalCard[]>(() => {
     return (aiHospitals ?? []).map((h) => ({
       id: String(h.hospitalId),
@@ -91,7 +89,6 @@ export default function HospitalRecommendationModal({
     }));
   }, [aiHospitals]);
 
-  // ✅ 초기 로딩
   useEffect(() => {
     if (!isOpen) return;
     setHospitalList(hospitals);
@@ -100,7 +97,6 @@ export default function HospitalRecommendationModal({
     return () => clearTimeout(timer);
   }, [isOpen, hospitals]);
 
-  // ✅ 체크 토글
   const toggleHospital = (id: string) => {
     setHospitalList((prev) => {
       const updated = prev.map((h) =>
@@ -111,7 +107,6 @@ export default function HospitalRecommendationModal({
     });
   };
 
-  // ✅ 요청 처리 로직 (거절 → 재추천 → 정상)
   const handleSendRequest = async (hospitalIds: (string | number)[]) => {
     try {
       const sessionCode = localStorage.getItem("currentSessionCode");
@@ -143,19 +138,23 @@ export default function HospitalRecommendationModal({
       await sendRequestMutation.mutateAsync(body);
 
       toast.success("요청을 성공적으로 전송했어요!");
-      localStorage.setItem("ems:showOngoing", "1");
 
+      // ✅ 수정됨: 진행 중 요청 플래그 설정 후 약간 지연 이동
+      localStorage.setItem("ems:showOngoing", "1");
       setIsConfirmOpen(false);
       onClose();
-      onRequestComplete?.();
-      router.push("/");
+
+      // ✅ 300ms 후 이동 (state 초기화 방지)
+      setTimeout(() => {
+        router.push("/");
+      }, 300);
+
     } catch (err) {
       console.error(err);
       toast.error("요청 전송 중 오류가 발생했습니다.");
     }
   };
 
-  // ✅ 다중 선택
   const handleSendSelected = () => {
     const selectedHospitals = hospitalList.filter((h) => h.checked);
     if (selectedHospitals.length === 0) {
@@ -206,7 +205,7 @@ export default function HospitalRecommendationModal({
         </div>
       )}
 
-      {/* ✅ 병원 카드 목록 (UI 그대로 유지) */}
+      {/* ✅ 병원 카드 목록 */}
       {!isLoading && !isConfirmOpen && (
         <>
           <div className="fixed inset-0 bg-black/30 z-55" onClick={onClose} />
@@ -215,7 +214,6 @@ export default function HospitalRecommendationModal({
               <Header variant="sub" title="새 환자 등록" />
               <div className="flex-1 bg-[#F7F7F7] rounded-t-3xl overflow-hidden flex flex-col mt-15">
                 <div className="flex-1 overflow-y-auto px-5 py-6">
-                  {/* 헤더 */}
                   <div className="flex items-center gap-2 mb-4">
                     <Image
                       src="/lotties/ai-star.png"
@@ -229,7 +227,6 @@ export default function HospitalRecommendationModal({
                     </span>
                   </div>
 
-                  {/* 전체선택 */}
                   <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
                     <div className="flex items-center gap-2">
                       <input
@@ -260,14 +257,12 @@ export default function HospitalRecommendationModal({
                     </span>
                   </div>
 
-                  {/* 병원 카드 */}
                   <div className="space-y-3 pb-2">
                     {hospitalList.map((hospital, idx) => (
                       <div
                         key={hospital.id ?? idx}
                         className="bg-white rounded-2xl p-4 border border-white"
                       >
-                        {/* 병원명 */}
                         <div className="flex items-start gap-3 mb-3">
                           <input
                             type="checkbox"
@@ -291,14 +286,12 @@ export default function HospitalRecommendationModal({
                           </div>
                         </div>
 
-                        {/* 특이사항 */}
                         <div className="bg-[#F7F7F7] rounded-lg px-3 py-2.5 mb-2 flex items-center">
                           <p className="text-[13px] font-medium text-gray-700">
                             {hospital.specialties[0]}
                           </p>
                         </div>
 
-                        {/* 치료 가능 시술 */}
                         <div className="bg-[#F7F7F7] rounded-lg px-3 py-2.5 mb-4 flex items-center">
                           <span className="text-[13px] font-medium text-gray-600 mr-1.5">
                             치료 가능 시술 :
@@ -318,7 +311,6 @@ export default function HospitalRecommendationModal({
                           </div>
                         </div>
 
-                        {/* 거리 정보 */}
                         <div className="grid grid-cols-3 mb-4 divide-x divide-gray-200">
                           <div className="text-center px-1">
                             <p className="text-[13px] text-gray-500">총 거리</p>
@@ -344,7 +336,6 @@ export default function HospitalRecommendationModal({
                           </div>
                         </div>
 
-                        {/* 태그 */}
                         <div className="flex gap-2 mb-3 flex-wrap">
                           {hospital.departments.map((dept, i) => (
                             <span
@@ -362,7 +353,6 @@ export default function HospitalRecommendationModal({
                           ))}
                         </div>
 
-                        {/* 버튼 */}
                         <div className="flex gap-2">
                           <button
                             type="button"
@@ -395,7 +385,6 @@ export default function HospitalRecommendationModal({
                   </div>
                 </div>
 
-                {/* 하단 버튼 */}
                 <div className="bg-white border-t border-gray-200 px-5 py-4">
                   <button
                     type="button"
@@ -416,7 +405,6 @@ export default function HospitalRecommendationModal({
         </>
       )}
 
-      {/* ✅ 확인 모달 */}
       <RequestConfirmModal
         isOpen={isConfirmOpen}
         onClose={() => setIsConfirmOpen(false)}
@@ -427,7 +415,6 @@ export default function HospitalRecommendationModal({
         }}
       />
 
-      {/* ✅ 거절 모달 */}
       <RequestDeclineModal
         isOpen={isDeclineOpen}
         onRetry={() => {
