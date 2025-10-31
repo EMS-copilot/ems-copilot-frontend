@@ -31,14 +31,14 @@ export default function OngoingCases() {
   // 임시 데이터
   const cases: CaseItem[] = [
     {
-      id: "P2024-001",
+      id: "P2025-12345",
       status: "위급",
       symptom: "흉통",
       time: "14시 32분",
-      location: "강남구 테헤란로 427",
+      location: "경기도 이천시 경충대로 2742",
       hospitalStatus: "이송 중",
       hospital: {
-        name: "중복대학교 병원",
+        name: "경기도의료원이천병원",
         type: "서울특별시",
         distance: "3.4km",
         waitTime: "8분",
@@ -47,25 +47,6 @@ export default function OngoingCases() {
         specialties: "심혈관센터, 응급실",
         badgeColor: "green",
         badgeText: "여유",
-      },
-    },
-    {
-      id: "P2024-002",
-      status: "긴급",
-      symptom: "흉통",
-      time: "14시 45분",
-      location: "서초구 반포대로 123",
-      hospitalStatus: "이송 중",
-      hospital: {
-        name: "강남세브란스병원",
-        type: "서울특별시",
-        distance: "3.4km",
-        waitTime: "8분",
-        beds: "12분",
-        treatments: ["PCI", "ECMO", "IABP"],
-        specialties: "뇌출혈센터 운영, 신경외과 전문의 대기",
-        badgeColor: "purple",
-        badgeText: "보통",
       },
     },
   ];
