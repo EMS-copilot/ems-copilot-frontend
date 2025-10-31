@@ -51,6 +51,7 @@ export default function RequestConfirmModal({
       // 성공 처리
       localStorage.setItem("ems:showOngoing", "1");
       setStep("success");
+      router.push("/");
     } catch (error) {
       console.error(error);
       toast.error("요청 전송 중 오류가 발생했습니다.");
