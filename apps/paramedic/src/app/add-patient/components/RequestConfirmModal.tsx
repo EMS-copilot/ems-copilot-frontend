@@ -50,7 +50,6 @@ export default function RequestConfirmModal({
 
       // 성공 처리
       localStorage.setItem("ems:showOngoing", "1");
-      setStep("success");
       router.push("/");
     } catch (error) {
       console.error(error);
