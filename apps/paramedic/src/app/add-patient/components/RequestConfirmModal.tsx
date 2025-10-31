@@ -17,6 +17,7 @@ interface RequestConfirmModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedHospitals: Hospital[];
+  onConfirm: () => void;
 }
 
 export default function RequestConfirmModal({
